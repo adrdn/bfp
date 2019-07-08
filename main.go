@@ -10,7 +10,9 @@ import (
 func main() {
 	log.Println("Server is started on: http://localhost:8100")
 	
-	http.HandleFunc("/", company.ShowAllCompanies)
+	http.HandleFunc("/company", company.ShowAllCompanies)
+	http.HandleFunc("/company/new", company.New)
+	http.HandleFunc("/company/insert", company.Insert)
 
 	http.ListenAndServe(":8100", nil)
 }

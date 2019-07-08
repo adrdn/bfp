@@ -112,7 +112,7 @@ func Insert (w http.ResponseWriter, r *http.Request) {
 		}
 		newData.Exec(name, category)
 		defer db.Close()
-		http.Redirect(w, r, "/", 301)
+		http.Redirect(w, r, "/company", 301)
 	}
 }
 
@@ -126,5 +126,5 @@ func Delete (w http.ResponseWriter, r *http.Request) {
 	}
 	deletedData.Exec(id)
 	defer db.Close()
-	http.Redirect(w, r, "/", 301)
+	http.Redirect(w, r, "/company", 301)
 }
