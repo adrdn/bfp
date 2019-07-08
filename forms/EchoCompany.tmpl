@@ -14,6 +14,7 @@
                     <td><b>Name</b></td>
                     <td><b>Category</b></td>
                     <td><b>Edit</b></td>
+                    <td><b>Delete</b></td>
                 </tr>
             </thead>
             <tbody>
@@ -23,6 +24,7 @@
                         <td>{{ .Name }}</td>
                         <td>{{ .Type }}</td>
                         <td><a href="/company/edit?id={{ .ID }}">Edit</a></td>
+                        <td><a href="/company/delete?id={{ .ID }}" onclick="return confirm('Are you sure?')">Delete</a></td>
                     </tr>
                 {{ end }}
             </tbody>
