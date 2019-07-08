@@ -83,16 +83,17 @@ func Edit (w http.ResponseWriter, r *http.Request) {
 func Update (w http.ResponseWriter, r *http.Request) {
 	db := config.DbConn()
 	if r.Method == "POST" {
+		id := r.FormValue("id")
 		name := r.FormValue("name")
 		category := r.FormValue("type")
 		updatedData, err := db.Prepare(updateCompany)
 		if err != nil {
 			panic(err)
 		}
-		updatedData.Exec(name, category)
+		updatedData.Exec(name, category, id)
 	}
 	defer db.Close()
-	http.Redirect(w, r, "/", 301)
+	http.Redirect(w, r, "/company", 301)
 }
 
 // New represents the new entity page

@@ -13,6 +13,7 @@
                     <td><b>ID</b></td>
                     <td><b>Name</b></td>
                     <td><b>Category</b></td>
+                    <td><b>Edit</b></td>
                 </tr>
             </thead>
             <tbody>
@@ -21,6 +22,7 @@
                         <td>{{ .ID }}</td>
                         <td>{{ .Name }}</td>
                         <td>{{ .Type }}</td>
+                        <td><a href="/company/edit?id={{ .ID }}">Edit</a></td>
                     </tr>
                 {{ end }}
             </tbody>
