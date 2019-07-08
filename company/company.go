@@ -4,6 +4,8 @@ import (
 	"net/http"
 	"text/template"
 	"drdn/bfp/config"
+
+	_ "github.com/go-sql-driver/mysql"
 )
 
 const echoAllCompanies 	= "SELECT * FROM company"
@@ -20,10 +22,10 @@ type Company struct {
 }
 
 var tmpl = template.Must(template.ParseGlob("forms/*"))
-var db 	 = config.DbConn()
 
 // ShowAllCompanies displays all of the companies
 func ShowAllCompanies(w http.ResponseWriter, r *http.Request) {
+	db := config.DbConn()
 	selDB, err := db.Query(echoAllCompanies)
 	if err != nil {
 		panic(err)
@@ -45,12 +47,13 @@ func ShowAllCompanies(w http.ResponseWriter, r *http.Request) {
 		com.Type 	= _type
 		comList 	= append(comList, com)
 	}
-	tmpl.ExecuteTemplate(w, "Company", comList)
+	tmpl.ExecuteTemplate(w, "EchoCompany", comList)
 	defer db.Close()
 }
 
 // Edit edits the entity
 func Edit (w http.ResponseWriter, r *http.Request) {
+	db := config.DbConn()
 	rowID := r.URL.Query().Get("id")
 	selDB, err := db.Query(echoOneCompany, rowID)
 	if err != nil {
@@ -72,12 +75,13 @@ func Edit (w http.ResponseWriter, r *http.Request) {
 		com.Name 	= _name
 		com.Type 	= _type
 	}
-	tmpl.ExecuteTemplate(w, "Edit", com)
+	tmpl.ExecuteTemplate(w, "EditCompany", com)
 	defer db.Close()
 }
 
 // Update updates the selected entity with given data
 func Update (w http.ResponseWriter, r *http.Request) {
+	db := config.DbConn()
 	if r.Method == "POST" {
 		name := r.FormValue("name")
 		category := r.FormValue("type")
@@ -93,11 +97,12 @@ func Update (w http.ResponseWriter, r *http.Request) {
 
 // New represents the new entity page
 func New (w http.ResponseWriter, r *http.Request) {
-	tmpl.ExecuteTemplate(w, "New", nil)
+	tmpl.ExecuteTemplate(w, "NewCompany", nil)
 }
 
 // Insert adds the new entity
 func Insert (w http.ResponseWriter, r *http.Request) {
+	db := config.DbConn()
 	if r.Method == "POST" {
 		name := r.FormValue("name")
 		category := r.FormValue("type")
@@ -113,6 +118,7 @@ func Insert (w http.ResponseWriter, r *http.Request) {
 
 // Delete drops the entity
 func Delete (w http.ResponseWriter, r *http.Request) {
+	db := config.DbConn()
 	id := r.URL.Query().Get("id")
 	deletedData, err := db.Prepare(deleteCompany)
 	if err != nil {
