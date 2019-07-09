@@ -1,0 +1,27 @@
+{{ define "SignUp" }}
+<!DOCTYPE html>
+<html lang="en-US">
+    <head></head>
+    <body>
+        <form method="POST" action="/login" id="registration">
+            <table>
+                <thead>
+                    <tr>
+                        <td><b>Name</b></td>
+                        <td><input type="text" name="name" required></td>
+                    </tr>
+                    <tr>
+                        <td><b>User Name</b></td>
+                        <td><b><input type="text" name="username" required></b></td>
+                    </tr>
+                    <tr>
+                        <td><b>Password</b></td>
+                        <td><b><input type="password" name="password" required></b></td>
+                    </tr>
+                </thead>
+            </table><br>
+        </form>
+        <button type="submit" form="registration" value="save" autofocus>Register</button>
+    </body>
+</html>
+{{ end }}

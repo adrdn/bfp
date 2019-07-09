@@ -3,7 +3,8 @@ package company
 import (
 	"net/http"
 	"text/template"
-	"drdn/bfp/config"
+	
+	"adrdn/bfp/config"
 
 	_ "github.com/go-sql-driver/mysql"
 )
@@ -11,7 +12,7 @@ import (
 const echoAllCompanies 	= "SELECT * FROM company"
 const echoOneCompany   	= "SELECT * FROM company WHERE id = ?"
 const updateCompany	   	= "UPDATE company SET name = ?, type = ? WHERE id = ?"
-const addNewCompany		= "INSERT INTO company (name, type) VALUES (?, ?)"
+const addNewCompany		= "INSERT INTO company(name, type) VALUES (?, ?)"
 const deleteCompany		= "DELETE FROM company WHERE id = ?"
 
 // Company represents the company table structure
@@ -21,7 +22,7 @@ type Company struct {
 	Type	string
 }
 
-var tmpl = template.Must(template.ParseGlob("forms/*"))
+var tmpl = template.Must(template.ParseGlob("forms/company/*"))
 
 // ShowAllCompanies displays all of the companies
 func ShowAllCompanies(w http.ResponseWriter, r *http.Request) {
@@ -47,7 +48,7 @@ func ShowAllCompanies(w http.ResponseWriter, r *http.Request) {
 		com.Type 	= _type
 		comList 	= append(comList, com)
 	}
-	tmpl.ExecuteTemplate(w, "EchoCompany", comList)
+	tmpl.ExecuteTemplate(w, "Echo", comList)
 	defer db.Close()
 }
 
@@ -75,7 +76,7 @@ func Edit (w http.ResponseWriter, r *http.Request) {
 		com.Name 	= _name
 		com.Type 	= _type
 	}
-	tmpl.ExecuteTemplate(w, "EditCompany", com)
+	tmpl.ExecuteTemplate(w, "Edit", com)
 	defer db.Close()
 }
 
@@ -98,7 +99,7 @@ func Update (w http.ResponseWriter, r *http.Request) {
 
 // New represents the new entity page
 func New (w http.ResponseWriter, r *http.Request) {
-	tmpl.ExecuteTemplate(w, "NewCompany", nil)
+	tmpl.ExecuteTemplate(w, "New", nil)
 }
 
 // Insert adds the new entity

@@ -1,0 +1,46 @@
+package credential
+
+import (
+	"net/http"
+	"text/template"
+
+	"adrdn/bfp/config"
+
+	_ "github.com/go-sql-driver/mysql"
+)
+
+const addNewUser = "INSERT INTO user(name, companyID, username, password) VALUES (?, ?, ?, ?) "
+
+// User represents the user structure
+type User struct {
+	ID			int
+	Name		string
+	CompanyID	int
+	Username	string
+	Password	string
+}
+
+var tmpl = template.Must(template.ParseGlob("forms/user/*"))
+
+// SignUp represent the sign up page
+func SignUp(w http.ResponseWriter, r *http.Request) {
+	tmpl.ExecuteTemplate(w, "SignUp", nil)
+}
+
+// RegisterNewUser registers the user
+func RegisterNewUser(w http.ResponseWriter, r *http.Request) {
+	db := config.DbConn()
+	if r.Method == "POST" {
+		name := r.FormValue("name")
+		compID := r.FormValue("compID")
+		username := r.FormValue("username")
+		password := r.FormValue("password")
+		newUserData, err := db.Prepare(addNewUser)
+		if err != nil {
+			panic(err)
+		}
+		newUserData.Exec(name, compID, username, password)
+	}
+	defer db.Close()
+	http.Redirect(w, r, "/login", 301)
+}
