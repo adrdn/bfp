@@ -39,7 +39,10 @@ func RegisterNewUser(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			panic(err)
 		}
-		newUserData.Exec(name, compID, username, password)
+		_, err = newUserData.Exec(name, compID, username, password)
+		if err != nil {
+			panic(err)
+		}
 	}
 	defer db.Close()
 	http.Redirect(w, r, "/login", 301)
