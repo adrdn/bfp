@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"text/template"
 	
-	"adrdn/bfp/config"
+	"adrdn/dit/config"
 
 	_ "github.com/go-sql-driver/mysql"
 )
@@ -53,7 +53,7 @@ func ShowAllCompanies(w http.ResponseWriter, r *http.Request) {
 }
 
 // Edit edits the entity
-func Edit (w http.ResponseWriter, r *http.Request) {
+/*func Edit (w http.ResponseWriter, r *http.Request) {
 	db := config.DbConn()
 	rowID := r.URL.Query().Get("id")
 	selDB, err := db.Query(echoOneCompany, rowID)
@@ -61,6 +61,17 @@ func Edit (w http.ResponseWriter, r *http.Request) {
 		panic(err)
 	}
 	
+	for checkData.Next() {
+		err = checkData.Scan(&_username, &hashedPassword)
+		if err != nil || _username == "" || hashedPassword == "" {
+			panic(err)
+			//http.Error(w, "Invalid username", 500)
+		}
+		if err = bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password)); err != nil {
+			panic(err)
+			//http.Error(w, "Invalid Password", 500)
+		}
+	}
 	com := Company{}
 
 	for selDB.Next() {
@@ -78,7 +89,7 @@ func Edit (w http.ResponseWriter, r *http.Request) {
 	}
 	tmpl.ExecuteTemplate(w, "Edit", com)
 	defer db.Close()
-}
+}*/
 
 // Update updates the selected entity with given data
 func Update (w http.ResponseWriter, r *http.Request) {
