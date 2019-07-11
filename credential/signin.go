@@ -9,6 +9,7 @@ import (
 )
 
 const listOneUser = "SELECT password FROM user where username = ?"
+var authenticated bool
 
 // Login revokes the login page
 func Login(w http.ResponseWriter, r *http.Request) {
@@ -26,7 +27,7 @@ func Authentication(w http.ResponseWriter, r *http.Request) {
 
 		checkData, err := db.Query(listOneUser, username)
 		if err != nil {
-			panic(err)
+			w.WriteHeader(http.StatusInternalServerError)
 		}
 
 		for checkData.Next() {
@@ -41,6 +42,7 @@ func Authentication(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), 500)
 		} else {
 			defer db.Close()
+			authenticated = true
 			http.Redirect(w, r, "/home", 301)
 		}
 		
@@ -49,5 +51,15 @@ func Authentication(w http.ResponseWriter, r *http.Request) {
 
 // Home revokes the home page
 func Home(w http.ResponseWriter, r *http.Request) {
-	tmpl.ExecuteTemplate(w, "Home", nil)
+	if authenticated {
+		tmpl.ExecuteTemplate(w, "Home", nil)
+	} else {
+		http.Redirect(w, r, "/login", 301)
+	}
+}
+
+// Logout signs out the user
+func Logout(w http.ResponseWriter, r *http.Request) {
+	authenticated = false
+	http.Redirect(w, r, "/login", 301)
 }

@@ -23,6 +23,7 @@ func main() {
 	http.HandleFunc("/login", credential.Login)
 	http.HandleFunc("/auth", credential.Authentication)
 	http.HandleFunc("/home", credential.Home)
+	http.HandleFunc("/logout", credential.Logout)
 
 	http.ListenAndServe(":8100", nil)
 }
