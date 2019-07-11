@@ -51,5 +51,5 @@ func RegisterNewUser(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	defer db.Close()
-	tmpl.ExecuteTemplate(w, "Login", nil)
+	http.Redirect(w, r, "/login", 301)
 }

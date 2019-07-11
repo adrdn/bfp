@@ -19,6 +19,7 @@ func main() {
 	http.HandleFunc("/company/delete", company.Delete)
 
 	http.HandleFunc("/register", credential.SignUp)
+	http.HandleFunc("/signup", credential.RegisterNewUser)
 	http.HandleFunc("/login", credential.Login)
 	http.HandleFunc("/auth", credential.Authentication)
 	http.HandleFunc("/home", credential.Home)
