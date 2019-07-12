@@ -2,14 +2,15 @@
 <!DOCTYPE html>
 <html lang="en-US">
     <form method="POST" action="/admin/role/update" id="EditForm"> 
-        <table border="1">
+        <table>
             <thead></thead>
             <tbody>
                 <tr>
-                    <td><b>Name</b></td>
+                    <td><b>Name:</b></td>
+                    <td><input type="hidden" name="id" value="{{ .ID }}"></td>
                     <td><input type="text" name="name" value="{{ .Name }}"></td>
                 </tr>
-            </tbody>>
+            </tbody>
         </table><br>
     </form>
      <button type="submit" form="EditForm" autofocus>Save</button> 

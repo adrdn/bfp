@@ -16,8 +16,10 @@ func main() {
 	http.HandleFunc("/admin/users/delete", user.DeleteUser)
 
 	http.HandleFunc("/admin/role", role.ShowAllRoles)
-	http.HandleFunc("/admin/edit", role.Edit)
+	http.HandleFunc("/admin/role/edit", role.Edit)
 	http.HandleFunc("/admin/role/update", role.Update)
+	http.HandleFunc("/admin/role/new", role.New)
+	http.HandleFunc("/admin/role/insert", role.Insert)
 
 	http.HandleFunc("/register", credential.SignUp)
 	http.HandleFunc("/signup", credential.RegisterNewUser)

@@ -10,6 +10,7 @@ import (
 const echoAllRoles	= "SELECT  ID, name FROM role"
 const echoOneRole	= "SELECT * FROM role WHERE id = ?"
 const updateRole 	= "UPDATE role SET name = ? WHERE id = ?"
+const newRole		= "INSERT INTO role (name) VALUES (?)"
 const deleteUser 	= "DELETE FROM role WHERE id = ?" 
 
 // Role represents the role structure
@@ -32,7 +33,7 @@ func ShowAllRoles (w http.ResponseWriter, r *http.Request) {
 	roleList := []Role{}
 
 	for rList.Next() {
-		err = rList.Scan(role.ID, role.Name)
+		err = rList.Scan(&role.ID, &role.Name)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 		}
@@ -54,7 +55,7 @@ func Edit (w http.ResponseWriter, r *http.Request) {
 	role := Role{}
 
 	for rList.Next() {
-		err = rList.Scan(role.ID, role.Name)
+		err = rList.Scan(&role.ID, &role.Name)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 		}
@@ -73,31 +74,31 @@ func Update (w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 		}
-		updForm.Exec(id, name)
+		updForm.Exec(name, id)
 	}
 	defer db.Close()
 	http.Redirect(w, r, "/admin/role", 301)
 }
 
-// // New represents the new entity page
-// func New (w http.ResponseWriter, r *http.Request) {
-// 	tmpl.ExecuteTemplate(w, "New", nil)
-// }
+// New represents the new role page
+func New (w http.ResponseWriter, r *http.Request) {
+	tmpl.ExecuteTemplate(w, "New", nil)
+}
 
-// // Insert adds the new entity
-// func Insert (w http.ResponseWriter, r *http.Request) {
-// 	db := config.DbConn()
-// 	if r.Method == "POST" {
-// 		Name := r.FormValue("name")
-// 		Day := r.FormValue("day")
-// 		Time := r.FormValue("time")
-// 		insForm, err := db.Prepare("INSERT INTO courses (name, day, time) VALUES (?, ?, ?)")
-// 		config.CheckErr(err)
-// 		insForm.Exec(Name, Day, Time)
-// 	}
-// 	defer db.Close()
-// 	http.Redirect(w, r, "/course/", 301)
-// }
+// Insert adds the new role
+func Insert (w http.ResponseWriter, r *http.Request) {
+	db := config.DbConn()
+	if r.Method == "POST" {
+		name := r.FormValue("name")
+		insForm, err := db.Prepare(newRole)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+		}
+		insForm.Exec(name)
+	}
+	defer db.Close()
+	http.Redirect(w, r, "/admin/role", 301)
+}
 
 // // Delete deletes the entity
 // func Delete (w http.ResponseWriter, r *http.Request) {

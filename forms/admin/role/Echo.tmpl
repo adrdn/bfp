@@ -16,13 +16,13 @@
                 </tr>
             </thead>
             <tbody>
-                {{ range . }}
+            {{ range . }}
                     <tr>
                         <td>{{ .Name }}</td>
                         <td><a href="/admin/role/edit?id={{ .ID }}">Edit</a></td>
                         <td><a href="/admin/role/delete?id={{ .ID }}" onclick="return confirm('Are you sure?')">Delete</a></td>
                     </tr>
-                {{ end }}
+            {{ end }}
             </tbody>
         </table>
     </body>
