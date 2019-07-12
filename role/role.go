@@ -100,15 +100,16 @@ func Insert (w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/admin/role", 301)
 }
 
-// // Delete deletes the entity
-// func Delete (w http.ResponseWriter, r *http.Request) {
-// 	db := config.DbConn()
-// 	id := r.URL.Query().Get("id")
-// 	delForm, err := db.Prepare("Delete from courses WHERE id = ?")
-// 	if err != nil {
-// 		panic(err.Error())
-// 	}
-// 	delForm.Exec(id)
-// 	defer db.Close()
-// 	http.Redirect(w, r, "/course/", 301)
-// }
+// Delete hard-deletes the role from the database
+func Delete (w http.ResponseWriter, r *http.Request) {
+	db := config.DbConn()
+	id := r.URL.Query().Get("id")
+	delForm, err := db.Prepare(deleteUser)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+	}
+	delForm.Exec(id)
+
+	defer db.Close()
+	http.Redirect(w, r, "/admin/role", 301)
+}

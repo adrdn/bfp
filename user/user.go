@@ -42,7 +42,7 @@ func DisplayAllUsers(w http.ResponseWriter, r *http.Request) {
 	defer db.Close()
 }
 
-// DeleteUser drops the user
+// DeleteUser hard-deletes the user from the database
 func DeleteUser(w http.ResponseWriter, r *http.Request) {
 	db := config.DbConn()
 	id := r.URL.Query().Get("id")
@@ -51,6 +51,7 @@ func DeleteUser(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	}
 	deletedUser.Exec(id)
+	
 	defer db.Close()
 	http.Redirect(w, r, "/admin/users", 301)
 }
