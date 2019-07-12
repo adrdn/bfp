@@ -16,7 +16,7 @@ func main() {
 	// http.HandleFunc("/company/insert", company.Insert)
 	// //http.HandleFunc("/company/edit", company.Edit)
 	// http.HandleFunc("/company/update", company.Update)
-	// http.HandleFunc("/company/delete", company.Delete)
+	http.HandleFunc("/admin/users/delete", user.DeleteUser)
 
 	http.HandleFunc("/register", credential.SignUp)
 	http.HandleFunc("/signup", credential.RegisterNewUser)
