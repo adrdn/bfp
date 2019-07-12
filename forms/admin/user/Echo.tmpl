@@ -7,12 +7,11 @@
             <script type="text/javascript" charset="utf8" src="//cdn.datatables.net/1.10.16/js/jquery.dataTables.js"></script>
     </head>
     <body>
-        <table id=fancytable class="display">
+        <table id=echo class="display">
             <thead>
                 <tr>
-                    <td><b>ID</b></td>
                     <td><b>Name</b></td>
-                    <td><b>Category</b></td>
+                    <td><b>Username</b></td>
                     <td><b>Edit</b></td>
                     <td><b>Delete</b></td>
                 </tr>
@@ -20,9 +19,8 @@
             <tbody>
                 {{ range . }}
                     <tr>
-                        <td>{{ .ID }}</td>
                         <td>{{ .Name }}</td>
-                        <td>{{ .Type }}</td>
+                        <td>{{ .Username }}</td>
                         <td><a href="/company/edit?id={{ .ID }}">Edit</a></td>
                         <td><a href="/company/delete?id={{ .ID }}" onclick="return confirm('Are you sure?')">Delete</a></td>
                     </tr>
@@ -32,7 +30,7 @@
     </body>
     <script>
         $(document).ready(function() {
-            $('#fancytable').DataTable();
+            $('#echo').DataTable();
         } );
     </script>
 </html>

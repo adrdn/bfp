@@ -13,15 +13,7 @@ import (
 
 const addNewUser = "INSERT INTO user(name, username, password) VALUES (?, ?, ?)"
 
-// User represents the user structure
-type User struct {
-	ID			int
-	Name		string
-	Username	string
-	Password	string
-}
-
-var tmpl = template.Must(template.ParseGlob("forms/user/*"))
+var tmpl = template.Must(template.ParseGlob("forms/credential/*"))
 
 // SignUp represent the sign up page
 func SignUp(w http.ResponseWriter, r *http.Request) {
