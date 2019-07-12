@@ -5,18 +5,17 @@ import (
 	"net/http"
 
 	"adrdn/dit/user"
+	"adrdn/dit/role"
 	"adrdn/dit/credential"
 )
 
 func main() {
-	log.Println("Server is started on: http://localhost:8100")
+	log.Println("Server is started on: http://localhost:8000")
 	
 	http.HandleFunc("/admin/users", user.DisplayAllUsers)
-	// http.HandleFunc("/company/new", company.New)
-	// http.HandleFunc("/company/insert", company.Insert)
-	// //http.HandleFunc("/company/edit", company.Edit)
-	// http.HandleFunc("/company/update", company.Update)
 	http.HandleFunc("/admin/users/delete", user.DeleteUser)
+
+	http.HandleFunc("/admin/role", role.ShowAllRoles)
 
 	http.HandleFunc("/register", credential.SignUp)
 	http.HandleFunc("/signup", credential.RegisterNewUser)
@@ -25,5 +24,5 @@ func main() {
 	http.HandleFunc("/home", credential.Home)
 	http.HandleFunc("/logout", credential.Logout)
 
-	http.ListenAndServe(":8100", nil)
+	http.ListenAndServe(":8000", nil)
 }
