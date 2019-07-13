@@ -6,6 +6,7 @@ import (
 
 	"adrdn/dit/user"
 	"adrdn/dit/role"
+	"adrdn/dit/flow"
 	"adrdn/dit/credential"
 )
 
@@ -21,6 +22,8 @@ func main() {
 	http.HandleFunc("/admin/role/new", role.New)
 	http.HandleFunc("/admin/role/insert", role.Insert)
 	http.HandleFunc("/admin/role/delete", role.Delete)
+
+	http.HandleFunc("/admin/flow", flow.ShowAllFlows)
 
 	http.HandleFunc("/register", credential.SignUp)
 	http.HandleFunc("/signup", credential.RegisterNewUser)

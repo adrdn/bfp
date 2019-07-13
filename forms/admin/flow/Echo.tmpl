@@ -1,0 +1,33 @@
+{{ define "Echo" }}
+<!DOCTYPE html>
+<html lang="en-US">
+    <head>
+        <script type="text/javascript" charset="utf8" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+        <link rel="stylesheet" type="text/css" href="//cdn.datatables.net/1.10.16/css/jquery.dataTables.css">
+        <script type="text/javascript" charset="utf8" src="//cdn.datatables.net/1.10.16/js/jquery.dataTables.js"></script>
+    </head>
+    <body>
+        <table id="echo" class="display">
+            <thead>
+                <tr>
+                    <td><b>Name</b></td>
+                    <td><b>Delete</b></td>
+                </tr>
+            </thead>
+            <tbody>
+                {{ range . }}
+                    <tr>
+                        <td>{{ .Name }}</td>
+                        <td><a href="/admin/flow/delete?id={{ .ID }}" onclick="return confirm('Are you sure?')"></a>Delete</td>
+                    </tr>
+                {{ end }}
+            </tbody>
+        </table>
+    </body>
+    <script>
+        $(document).ready(function() {
+            $('#echo').DataTable();
+        } );
+    </script>
+</html>
+{{ end }}

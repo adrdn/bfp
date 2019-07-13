@@ -9,7 +9,7 @@ import (
 )
 
 const listOneUser = "SELECT password FROM user where username = ?"
-var authenticated bool
+var Authenticated bool
 
 // Login revokes the login page
 func Login(w http.ResponseWriter, r *http.Request) {
@@ -42,7 +42,7 @@ func Authentication(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), 500)
 		} else {
 			defer db.Close()
-			authenticated = true
+			Authenticated = true
 			http.Redirect(w, r, "/home", 301)
 		}
 		
@@ -51,7 +51,7 @@ func Authentication(w http.ResponseWriter, r *http.Request) {
 
 // Home revokes the home page
 func Home(w http.ResponseWriter, r *http.Request) {
-	if authenticated {
+	if Authenticated {
 		tmpl.ExecuteTemplate(w, "Home", nil)
 	} else {
 		http.Redirect(w, r, "/login", 301)
@@ -60,6 +60,6 @@ func Home(w http.ResponseWriter, r *http.Request) {
 
 // Logout signs out the user
 func Logout(w http.ResponseWriter, r *http.Request) {
-	authenticated = false
+	Authenticated = false
 	http.Redirect(w, r, "/login", 301)
 }
