@@ -9,6 +9,7 @@ import (
 
 const echoAllFlows	= "SELECT * FROM flow"
 const newFlow		= "INSERT INTO flow (name) VALUES (?)"
+const deleteFlow	= "Delete FROM flow WHERE id = ?"
 
 // Flow represents the flow structure
 type Flow struct {
@@ -57,6 +58,19 @@ func Insert (w http.ResponseWriter, r *http.Request) {
 		}
 		insForm.Exec(name)
 	}
+	defer db.Close()
+	http.Redirect(w, r, "/admin/flow", 301)
+}
+
+// Delete removes the flow
+func Delete (w http.ResponseWriter, r *http.Request) {
+	db := config.DbConn()
+	id := r.URL.Query().Get("id")
+	delForm, err := db.Prepare(deleteFlow)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+	}
+	delForm.Exec(id)
 	defer db.Close()
 	http.Redirect(w, r, "/admin/flow", 301)
 }

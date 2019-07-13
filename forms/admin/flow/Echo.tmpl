@@ -18,7 +18,7 @@
                 {{ range . }}
                     <tr>
                         <td>{{ .Name }}</td>
-                        <td><a href="/admin/flow/delete?id={{ .ID }}" onclick="return confirm('Are you sure?')"></a>Delete</td>
+                        <td><a href="/admin/flow/delete?id={{ .ID }}" onclick="return confirm('Are you sure?')">Delete</a></td>
                     </tr>
                 {{ end }}
             </tbody>
