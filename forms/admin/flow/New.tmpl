@@ -1,0 +1,17 @@
+{{ define "New" }}
+<!DOCTYPE html>
+<html lang="en-US">
+    <form method="POST" action="/admin/flow/insert" id="newRole"> 
+        <table>
+            <thead></thead>
+            <tbody>
+                <tr>
+                    <td><b>Name:</b></td>
+                    <td><input type="text" name="name" required placeholder="Write the name here"></td>
+                </tr>
+            </tbody>
+        </table><br>
+    </form>
+     <button type="submit" form="newRole" autofocus>Save</button> 
+</html>
+{{ end }}

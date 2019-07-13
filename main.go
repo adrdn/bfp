@@ -24,6 +24,8 @@ func main() {
 	http.HandleFunc("/admin/role/delete", role.Delete)
 
 	http.HandleFunc("/admin/flow", flow.ShowAllFlows)
+	http.HandleFunc("/admin/flow/new", flow.New)
+	http.HandleFunc("/admin/flow/insert", flow.Insert)
 
 	http.HandleFunc("/register", credential.SignUp)
 	http.HandleFunc("/signup", credential.RegisterNewUser)

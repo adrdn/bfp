@@ -7,7 +7,8 @@ import (
 	"adrdn/dit/config"
 )
 
-const echoAllFlows	= "SELECT name FROM flow"
+const echoAllFlows	= "SELECT * FROM flow"
+const newFlow		= "INSERT INTO flow (name) VALUES (?)"
 
 // Flow represents the flow structure
 type Flow struct {
@@ -38,5 +39,25 @@ func ShowAllFlows (w http.ResponseWriter, r *http.Request) {
 	}
 	defer db.Close()
 	tmpl.ExecuteTemplate(w, "Echo", flowList)
+}
+
+// New revokes the new page
+func New (w http.ResponseWriter, r *http.Request) {
+	tmpl.ExecuteTemplate(w, "New", 301)
+}
+
+// Insert adds the new flow
+func Insert (w http.ResponseWriter, r *http.Request) {
+	db := config.DbConn()
+	if r.Method == "POST" {
+		name := r.FormValue("name")
+		insForm, err := db.Prepare(newFlow)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+		}
+		insForm.Exec(name)
+	}
+	defer db.Close()
+	http.Redirect(w, r, "/admin/flow", 301)
 }
 
