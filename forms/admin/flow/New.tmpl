@@ -1,7 +1,7 @@
 {{ define "New" }}
 <!DOCTYPE html>
 <html lang="en-US">
-    <form method="POST" action="/admin/flow/insert" id="newRole"> 
+    <form method="POST" action="/admin/flow/insert" id="newRole">
         <table>
             <thead></thead>
             <tbody>
@@ -11,11 +11,34 @@
                 </tr>
                 <tr>
                     <td><b>#Roles:</b></td>
-                    <td><input type="number" name="number" min="2" max="20" required placeholder="Enter the number of roles between 2 and 20"></td>
+                    <td><input type="number" name="number" id="count" min="2" max="20" required></td>
                 </tr>
             </tbody>
         </table><br>
-    </form>
-     <button type="submit" form="newRole" autofocus>Save</button> 
+        <div class="inputs">
+
+        </div>
+    </form><br>
+    
+    <button onclick="generateInputs(); this.onclick=null;" autofocus>Click to enter role names</button><br>
+    <button type="submit" form="newRole" autofocus>Save</button> 
+ <script>
+    function generateInputs() {
+      var count = document.getElementById("count").value;
+      var i;
+      var countInt = Number(count);
+      var divClass = document.getElementsByClassName("inputs");
+      if (countInt >= 2 && countInt <= 20) {
+        for (i = 0; i < countInt; i++) {
+          var input = document.createElement("input");
+          input.type = 'text'
+          input.name = 'role' + (i + 1)
+          input.placeholder = 'Enter role number ' + (i + 1)
+          input.required = true
+          divClass[0].appendChild(input)
+        }
+      }
+    }
+</script>
 </html>
 {{ end }}

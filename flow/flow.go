@@ -58,6 +58,7 @@ func Insert (w http.ResponseWriter, r *http.Request) {
 	str := strings.Builder{}
 	str.WriteString(createTable)
 	var steps []string
+	var values []string
 
 	if r.Method == "POST" {
 		name := r.FormValue("name")
@@ -80,11 +81,28 @@ func Insert (w http.ResponseWriter, r *http.Request) {
 		// create a table with the given name and column number
 		db.Query(str.String())
 		
+		// add a new entity to the 'flow' table
 		insForm, err := db.Prepare(newFlow)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 		}
 		insForm.Exec(name)
+
+		var str string
+		// populate the corresponding flow table
+		for i := 1; i <= number; i++ {
+			str = r.FormValue("role" + strconv.Itoa(i))
+			values = append(values, "'" + str + "'")
+			fmt.Println(str)
+		}
+		fmt.Println(values)
+		query := generatePopulateTableQuery(values, nameUpper)
+		fmt.Println(query)
+		_, err = db.Query(query)
+		if err != nil {
+			fmt.Println(err)
+		}
+
 	}
 	defer db.Close()
 	http.Redirect(w, r, "/admin/flow", 301)
@@ -113,3 +131,9 @@ func Delete (w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/admin/flow", 301)
 }
 
+// helper function
+func generatePopulateTableQuery(values []string, tableName string) string{
+	separateValues := strings.Join(values, ", ")
+	populate := "INSERT INTO flow_" + tableName + " VALUES (" + separateValues + ")"
+	return populate
+}
