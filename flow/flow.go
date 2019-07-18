@@ -1,7 +1,6 @@
 package flow
 
 import (
-	"fmt"
 	"strconv"
 	"strings"
 	"net/http"
@@ -130,13 +129,11 @@ func Delete (w http.ResponseWriter, r *http.Request) {
 
 	_, err := db.Query("DROP TABLE " + "flow_" + strings.ToUpper(name))
 	if err != nil {
-		fmt.Println(err)
 		w.WriteHeader(http.StatusInternalServerError)
 	}
 
 	delRow, err := db.Prepare(deleteFlow)
 	if err != nil {
-		fmt.Println(err)
 		w.WriteHeader(http.StatusInternalServerError)
 	}
 	delRow.Exec(id)

@@ -1,0 +1,25 @@
+{{ define "New" }}
+<!DOCTYPE html>
+<html lang="en-US">
+    <head>
+    </head>
+    <body>
+        <form method="POST" action="/request/process" id="request">
+            <div class="flow">
+                <p>Select the flow:</p>
+                <select required>
+                    <option value="" selected disabled>select the flow</option>
+                    {{ range . }}
+                        <option value="{{ .Name }}">{{ .Name }}</option>
+                    {{ end }}
+                </select>
+            </div>
+            <div class="description">
+                <p>Write description:</p>
+                <textarea name="description" cols="70" rows="10"></textarea>
+            </div>
+        </form><br>
+        <button style="width: 10%" type="submit" form="request" autofocus>Start</button>
+    </body>
+</html>
+{{ end }}

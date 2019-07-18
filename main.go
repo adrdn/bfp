@@ -7,11 +7,19 @@ import (
 	"adrdn/dit/user"
 	"adrdn/dit/role"
 	"adrdn/dit/flow"
+	"adrdn/dit/workflow"
 	"adrdn/dit/credential"
 )
 
 func main() {
 	log.Println("Server is started on: http://localhost:8000")
+
+	http.HandleFunc("/register", credential.SignUp)
+	http.HandleFunc("/signup", credential.RegisterNewUser)
+	http.HandleFunc("/login", credential.Login)
+	http.HandleFunc("/auth", credential.Authentication)
+	http.HandleFunc("/home", credential.Home)
+	http.HandleFunc("/logout", credential.Logout)
 	
 	http.HandleFunc("/admin/users", user.DisplayAllUsers)
 	http.HandleFunc("/admin/users/delete", user.DeleteUser)
@@ -28,12 +36,7 @@ func main() {
 	http.HandleFunc("/admin/flow/insert", flow.Insert)
 	http.HandleFunc("/admin/flow/delete", flow.Delete)
 
-	http.HandleFunc("/register", credential.SignUp)
-	http.HandleFunc("/signup", credential.RegisterNewUser)
-	http.HandleFunc("/login", credential.Login)
-	http.HandleFunc("/auth", credential.Authentication)
-	http.HandleFunc("/home", credential.Home)
-	http.HandleFunc("/logout", credential.Logout)
+	http.HandleFunc("/request/new", workflow.NewRequest)
 
 	http.ListenAndServe(":8000", nil)
 }
