@@ -7,7 +7,7 @@
         <form method="POST" action="/request/process" id="request">
             <div class="flow">
                 <p>Select the flow:</p>
-                <select required>
+                <select name="flow" required>
                     <option value="" selected disabled>select the flow</option>
                     {{ range . }}
                         <option value="{{ .Name }}">{{ .Name }}</option>

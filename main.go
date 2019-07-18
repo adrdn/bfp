@@ -36,7 +36,9 @@ func main() {
 	http.HandleFunc("/admin/flow/insert", flow.Insert)
 	http.HandleFunc("/admin/flow/delete", flow.Delete)
 
-	http.HandleFunc("/request/new", workflow.NewRequest)
+	http.HandleFunc("/request/new", workflow.New)
+	http.HandleFunc("/request/process", workflow.Insert)
+	http.HandleFunc("request/view", workflow.Echo)	
 
 	http.ListenAndServe(":8000", nil)
 }
