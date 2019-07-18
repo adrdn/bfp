@@ -109,14 +109,12 @@ func Insert (w http.ResponseWriter, r *http.Request) {
 		for i := 1; i <= number; i++ {
 			str = r.FormValue("role" + strconv.Itoa(i))
 			values = append(values, "'" + str + "'")
-			fmt.Println(str)
 		}
-		fmt.Println(values)
+
 		query := generatePopulateTableQuery(values, nameUpper)
-		fmt.Println(query)
 		_, err = db.Query(query)
 		if err != nil {
-			fmt.Println(err)
+			w.WriteHeader(http.StatusInternalServerError)
 		}
 
 	}

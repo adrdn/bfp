@@ -15,7 +15,7 @@
                 </tr>
             </tbody>
         </table><br>
-        <select id="roles" style="visibility: hidden;">
+        <select id="roles" name="role0" style="visibility: hidden;">
            {{ range . }}
             <option value="{{ .Name }}">{{ .Name }}</option>
           {{ end }} 
@@ -27,10 +27,11 @@
     <button onclick="iterator()";>Click to enter role names</button><br>
     <button type="submit" form="newRole" autofocus>Save</button> 
  <script>
-   function generateDropDownList() {
+   function generateDropDownList(num) {
        var elmnt = document.getElementById("roles");
        elmnt.style.visibility = "visible";
        var cln = elmnt.cloneNode(true);
+       cln.name = "role" + num;
        var section = document.getElementById("roleSection");
        section.appendChild(cln);
    }
@@ -42,8 +43,8 @@
        var i;
        var countInt = Number(count);
        if (countInt >= 2 && countInt <= 20) {
-          for (i = 0; i < countInt; i++) {
-            generateDropDownList();
+          for (i = 1; i <= countInt; i++) {
+            generateDropDownList(i);
           }
           but.disabled = true;
           sel.style.visibility = "hidden";
