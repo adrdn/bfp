@@ -100,3 +100,8 @@ func Echo(w http.ResponseWriter, r *http.Request) {
 	db.Close()
 	tmpl.ExecuteTemplate(w, "Echo", reqList)
 }
+
+// ShowDetails revoke the detail page
+func ShowDetails(w http.ResponseWriter, r *http.Request) {
+
+}

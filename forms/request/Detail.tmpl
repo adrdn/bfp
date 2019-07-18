@@ -1,0 +1,24 @@
+{{ define "Detail" }}
+<!DOCTYPE html>
+<html lang="en-US">
+    <head></head>
+    <body>
+        <div class="routing">
+            <p>Prior Step: {{  }} &emsp Next Step: {{  }}</p>
+        </div>
+        <div class="description">
+            <p>{{  }}</p>
+        </div>
+        <form method="POST" action="/request/view" id="request">
+            <div class="myDiscription">
+                <textarea name="myDescription" cols="70" rows="10"></textarea>
+            </div>
+            <div class="decision">
+                <input type="radio" name="decision" value="approve">Approve<br>
+                <input type="radio" name="decision" value="reject">Reject<br>
+            </div>
+        </form>
+        <button type="submit" form="request" autofocus>Submit</button>
+    </body>
+</html>
+{{ end }}
