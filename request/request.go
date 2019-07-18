@@ -1,4 +1,4 @@
-package workflow
+package request
 
 import (
 	"net/http"
@@ -9,9 +9,21 @@ import (
 )
 
 const echoAllFlow = "SELECT * FROM flow"
+const echoALLRequest = "SELECT * FROM request"
 const addNewRequest = "INSERT INTO request(type, current_step) VALUES(?, ?)"
 
-var tmpl = template.Must(template.ParseGlob("forms/workflow/*"))
+var tmpl = template.Must(template.ParseGlob("forms/request/*"))
+
+// Request represents the request structure
+type Request struct {
+	ID	 		int
+	Type 		string
+	CurrentStep int
+	Termination int
+	Completion	int
+	Deletion	int
+	Status		string
+}
 
 // Flow defines the selected flow by the user
 var Flow string
@@ -63,5 +75,28 @@ func Insert(w http.ResponseWriter, r *http.Request) {
 
 // Echo displays all of the requests
 func Echo(w http.ResponseWriter, r *http.Request) {
+	db := config.DbConn()
+	req := Request{}
+	reqList := []Request{}
 
+	requests, err := db.Query(echoALLRequest)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+	}
+	for requests.Next() {
+		err = requests.Scan(&req.ID, &req.Type, &req.CurrentStep, &req.Termination, &req.Completion, &req.Deletion)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+		}
+		if req.Termination == 0 && req.Completion == 0 {
+			req.Status = "In Process"
+		} else if req.Termination != 0 {
+			req.Status = "Terminated"	
+		} else {
+			req.Status = "Completed"
+		}
+		reqList = append(reqList, req)
+	}
+	db.Close()
+	tmpl.ExecuteTemplate(w, "Echo", reqList)
 }
