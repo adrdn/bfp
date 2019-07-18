@@ -7,7 +7,8 @@ import (
 	"adrdn/dit/config"
 )
 
-const echoAllRoles	= "SELECT  ID, name FROM role"
+// EchoAllRoles shows all the entities of role table
+const EchoAllRoles	= "SELECT  ID, name FROM role"
 const echoOneRole	= "SELECT * FROM role WHERE id = ?"
 const updateRole 	= "UPDATE role SET name = ? WHERE id = ?"
 const newRole		= "INSERT INTO role (name) VALUES (?)"
@@ -24,7 +25,7 @@ var tmpl = template.Must(template.ParseGlob("forms/admin/role/*"))
 // ShowAllRoles displays all of the roles
 func ShowAllRoles (w http.ResponseWriter, r *http.Request) {
 	db := config.DbConn()
-	rList, err := db.Query(echoAllRoles)
+	rList, err := db.Query(EchoAllRoles)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 	}

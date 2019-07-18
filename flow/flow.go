@@ -8,6 +8,7 @@ import (
 	"text/template"
 
 	"adrdn/dit/config"
+	"adrdn/dit/role"
 )
 
 const echoAllFlows		= "SELECT * FROM flow"
@@ -27,7 +28,7 @@ var tmpl = template.Must(template.ParseGlob("forms/admin/flow/*"))
 // ShowAllFlows displays all of the roles
 func ShowAllFlows (w http.ResponseWriter, r *http.Request) {
 	db := config.DbConn()
-	rList, err := db.Query(echoAllFlows)
+	fList, err := db.Query(echoAllFlows)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 	}
@@ -35,8 +36,8 @@ func ShowAllFlows (w http.ResponseWriter, r *http.Request) {
 	flow := Flow{}
 	flowList := []Flow{}
 
-	for rList.Next() {
-		err = rList.Scan(&flow.ID, &flow.Name)
+	for fList.Next() {
+		err = fList.Scan(&flow.ID, &flow.Name)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 		}
@@ -49,7 +50,22 @@ func ShowAllFlows (w http.ResponseWriter, r *http.Request) {
 
 // New revokes the new page
 func New (w http.ResponseWriter, r *http.Request) {
-	tmpl.ExecuteTemplate(w, "New", 301)
+	db := config.DbConn()
+	rList, err := db.Query(role.EchoAllRoles)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+	}
+	roleEntity := role.Role{}
+	roleList := []role.Role{}
+
+	for rList.Next() {
+		err = rList.Scan(&roleEntity.ID, &roleEntity.Name)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+		}
+		roleList = append(roleList, roleEntity)
+	}
+	tmpl.ExecuteTemplate(w, "New", roleList)
 }
 
 // Insert adds the new flow

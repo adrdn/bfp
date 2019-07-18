@@ -15,30 +15,42 @@
                 </tr>
             </tbody>
         </table><br>
-        <div class="inputs">
-
+        <select id="roles" style="visibility: hidden;">
+           {{ range . }}
+            <option value="{{ .Name }}">{{ .Name }}</option>
+          {{ end }} 
+        </select>
+        <div id="roleSection" style="width: 35%">
         </div>
     </form><br>
     
-    <button onclick="generateInputs(); this.onclick=null;" autofocus>Click to enter role names</button><br>
+    <button onclick="iterator()";>Click to enter role names</button><br>
     <button type="submit" form="newRole" autofocus>Save</button> 
  <script>
-    function generateInputs() {
-      var count = document.getElementById("count").value;
-      var i;
-      var countInt = Number(count);
-      var divClass = document.getElementsByClassName("inputs");
-      if (countInt >= 2 && countInt <= 20) {
-        for (i = 0; i < countInt; i++) {
-          var input = document.createElement("input");
-          input.type = 'text'
-          input.name = 'role' + (i + 1)
-          input.placeholder = 'Enter role number ' + (i + 1)
-          input.required = true
-          divClass[0].appendChild(input)
-        }
-      }
-    }
+   function generateDropDownList() {
+       var elmnt = document.getElementById("roles");
+       elmnt.style.visibility = "visible";
+       var cln = elmnt.cloneNode(true);
+       var section = document.getElementById("roleSection");
+       section.appendChild(cln);
+   }
+
+   function iterator() {
+       var but = document.getElementsByTagName("button")[0];
+       var count = document.getElementById("count").value;
+       var sel = document.getElementsByTagName("select")[0];
+       var i;
+       var countInt = Number(count);
+       if (countInt >= 2 && countInt <= 20) {
+          for (i = 0; i < countInt; i++) {
+            generateDropDownList();
+          }
+          but.disabled = true;
+          sel.style.visibility = "hidden";
+       } else {
+           alert("Enter a number between 2 and 20")
+       }
+   }
 </script>
 </html>
 {{ end }}
