@@ -11,7 +11,7 @@
             <thead>
                 <tr>
                     <td><b>ID</b></td>
-                    <td><b>Name</b></td>
+                    <td><b>Type</b></td>
                     <td><b>Current Step</b></td>
                     <td><b>Status</b></td>
                     <td><b>View</b></td>
@@ -24,7 +24,7 @@
                         <td>{{ .Type }}</td>
                         <td>{{ .CurrentStep }}</td>
                         <td>{{ .Status }}</td>
-                        <td><a href="/request/detail">View</a></td>
+                        <td><a href="/request/detail?id={{ .ID }}">View</a></td>
                     </tr>
                 {{ end }}
             </tbody>

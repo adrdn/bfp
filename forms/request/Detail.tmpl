@@ -4,10 +4,12 @@
     <head></head>
     <body>
         <div class="routing">
-            <p>Prior Step: {{  }} &emsp Next Step: {{  }}</p>
+            <p>Prior Step: <b>{{ .PriorStep }}</b> & Next Step: <b>{{ .NextStep }}</b></p>
         </div>
         <div class="description">
-            <p>{{  }}</p>
+            <p>Notes from Previous Step:<br>
+                <b>{{ .Description }}</b>
+            </p>
         </div>
         <form method="POST" action="/request/view" id="request">
             <div class="myDiscription">

@@ -1,6 +1,9 @@
 package request
 
 import (
+	"fmt"
+	"strings"
+	"strconv"
 	"net/http"
 	"text/template"
 
@@ -10,7 +13,8 @@ import (
 
 const echoAllFlow = "SELECT * FROM flow"
 const echoALLRequest = "SELECT * FROM request"
-const addNewRequest = "INSERT INTO request(type, current_step) VALUES(?, ?)"
+const echoOneRequest = "SELECT type, current_step, description FROM request WHERE ID = ?"
+const addNewRequest = "INSERT INTO request(type, current_step, description) VALUES(?, ?, ?)"
 
 var tmpl = template.Must(template.ParseGlob("forms/request/*"))
 
@@ -18,17 +22,15 @@ var tmpl = template.Must(template.ParseGlob("forms/request/*"))
 type Request struct {
 	ID	 		int
 	Type 		string
+	PriorStep	string
 	CurrentStep int
+	NextStep	string
 	Termination int
 	Completion	int
 	Deletion	int
 	Status		string
+	Description	string
 }
-
-// Flow defines the selected flow by the user
-var Flow string
-// Description defines the description entered by the user
-var Description string
 
 // New starts a new request of the select flow
 func New(w http.ResponseWriter, r *http.Request) {
@@ -56,18 +58,17 @@ func Insert(w http.ResponseWriter, r *http.Request) {
 	db := config.DbConn()
 	if r.Method == "POST" {
 		selectedFlow := r.FormValue("flow")
-		desc := r.FormValue("description")
+		description := r.FormValue("description")
 
 		newRequest, err :=db.Prepare(addNewRequest)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 		}
 		// current_step is assinged to 2 because at this stage the request is already created
-		_, err = newRequest.Exec(selectedFlow, 2)
+		_, err = newRequest.Exec(selectedFlow, 2, description)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 		}
-		Description = desc
 	}
 	db.Close()
 	http.Redirect(w, r, "/request/view", 301)
@@ -84,7 +85,7 @@ func Echo(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	}
 	for requests.Next() {
-		err = requests.Scan(&req.ID, &req.Type, &req.CurrentStep, &req.Termination, &req.Completion, &req.Deletion)
+		err = requests.Scan(&req.ID, &req.Type, &req.CurrentStep, &req.Termination, &req.Completion, &req.Deletion, &req.Description)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 		}
@@ -103,5 +104,55 @@ func Echo(w http.ResponseWriter, r *http.Request) {
 
 // ShowDetails revoke the detail page
 func ShowDetails(w http.ResponseWriter, r *http.Request) {
+	db := config.DbConn()
+	req := Request{}
 
+	ID := r.URL.Query().Get("id")
+
+	request, err := db.Query(echoOneRequest, ID)
+	if err != nil {
+		fmt.Println(err)
+		w.WriteHeader(http.StatusInternalServerError)
+	}
+	for request.Next() {
+		err = request.Scan(&req.Type, &req.CurrentStep, &req.Description)
+		if err != nil {
+			fmt.Println(err)
+			w.WriteHeader(http.StatusInternalServerError)
+		}
+	}
+
+	intPreStep := req.CurrentStep - 1
+	intNextStep := req.CurrentStep + 1
+
+	// Fetch string value of the previous Step
+	preStep, err := db.Query("SELECT step" + strconv.Itoa(intPreStep) + " FROM flow_" + strings.ToUpper(req.Type))
+	if err != nil {
+		fmt.Println(err)
+		w.WriteHeader(http.StatusInternalServerError)
+	}
+	for preStep.Next() {
+		err = preStep.Scan(&req.PriorStep)
+		if err != nil {
+			fmt.Println(err)
+			w.WriteHeader(http.StatusInternalServerError)
+		}
+	}
+
+	// Fetch string value of the next Step
+	nextStep, err := db.Query("SELECT step" + strconv.Itoa(intNextStep) + " FROM flow_" + strings.ToUpper(req.Type))
+	if err != nil {
+		fmt.Println(err)
+		w.WriteHeader(http.StatusInternalServerError)
+	}
+	for nextStep.Next() {
+		err = nextStep.Scan(&req.NextStep)
+		if err != nil {
+			fmt.Println(err)
+			w.WriteHeader(http.StatusInternalServerError)
+		}
+	}
+
+	db.Close()
+	tmpl.ExecuteTemplate(w, "Detail", req)
 }
