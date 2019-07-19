@@ -40,6 +40,7 @@ func main() {
 	http.HandleFunc("/request/process", request.Insert)
 	http.HandleFunc("/request/view", request.Echo)
 	http.HandleFunc("/request/detail", request.ShowDetails)
+	http.HandleFunc("/request/update", request.Update)
 
 	http.ListenAndServe(":8000", nil)
 }
