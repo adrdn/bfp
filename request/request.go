@@ -1,7 +1,6 @@
 package request
 
 import (
-	"fmt"
 	"strings"
 	"strconv"
 	"net/http"
@@ -111,13 +110,11 @@ func ShowDetails(w http.ResponseWriter, r *http.Request) {
 
 	request, err := db.Query(echoOneRequest, ID)
 	if err != nil {
-		fmt.Println(err)
 		w.WriteHeader(http.StatusInternalServerError)
 	}
 	for request.Next() {
 		err = request.Scan(&req.Type, &req.CurrentStep, &req.Description)
 		if err != nil {
-			fmt.Println(err)
 			w.WriteHeader(http.StatusInternalServerError)
 		}
 	}
@@ -128,13 +125,11 @@ func ShowDetails(w http.ResponseWriter, r *http.Request) {
 	// Fetch string value of the previous Step
 	preStep, err := db.Query("SELECT step" + strconv.Itoa(intPreStep) + " FROM flow_" + strings.ToUpper(req.Type))
 	if err != nil {
-		fmt.Println(err)
 		w.WriteHeader(http.StatusInternalServerError)
 	}
 	for preStep.Next() {
 		err = preStep.Scan(&req.PriorStep)
 		if err != nil {
-			fmt.Println(err)
 			w.WriteHeader(http.StatusInternalServerError)
 		}
 	}
@@ -142,13 +137,11 @@ func ShowDetails(w http.ResponseWriter, r *http.Request) {
 	// Fetch string value of the next Step
 	nextStep, err := db.Query("SELECT step" + strconv.Itoa(intNextStep) + " FROM flow_" + strings.ToUpper(req.Type))
 	if err != nil {
-		fmt.Println(err)
 		w.WriteHeader(http.StatusInternalServerError)
 	}
 	for nextStep.Next() {
 		err = nextStep.Scan(&req.NextStep)
 		if err != nil {
-			fmt.Println(err)
 			w.WriteHeader(http.StatusInternalServerError)
 		}
 	}

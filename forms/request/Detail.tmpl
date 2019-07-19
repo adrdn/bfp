@@ -3,6 +3,9 @@
 <html lang="en-US">
     <head></head>
     <body>
+        <div class="type">
+            <p>Flow Name: <b>{{ .Type }}</b></p>
+        </div>
         <div class="routing">
             <p>Prior Step: <b>{{ .PriorStep }}</b> & Next Step: <b>{{ .NextStep }}</b></p>
         </div>
@@ -13,13 +16,14 @@
         </div>
         <form method="POST" action="/request/view" id="request">
             <div class="myDiscription">
+                <p>Your Notes[optional]:</p>
                 <textarea name="myDescription" cols="70" rows="10"></textarea>
             </div>
             <div class="decision">
                 <input type="radio" name="decision" value="approve">Approve<br>
-                <input type="radio" name="decision" value="reject">Reject<br>
+                <input type="radio" name="decision" value="reject">Reject
             </div>
-        </form>
+        </form><br>
         <button type="submit" form="request" autofocus>Submit</button>
     </body>
 </html>
