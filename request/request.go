@@ -83,11 +83,13 @@ func Echo(w http.ResponseWriter, r *http.Request) {
 
 	requests, err := db.Query(echoALLRequest)
 	if err != nil {
+		fmt.Println(err)
 		w.WriteHeader(http.StatusInternalServerError)
 	}
 	for requests.Next() {
 		err = requests.Scan(&req.ID, &req.Type, &req.CurrentStep, &req.Termination, &req.Completion, &req.Deletion, &req.Description)
 		if err != nil {
+			fmt.Println(err)
 			w.WriteHeader(http.StatusInternalServerError)
 		}
 		if req.Termination == 0 && req.Completion == 0 {
@@ -122,22 +124,29 @@ func ShowDetails(w http.ResponseWriter, r *http.Request) {
 	}
 
 	intPreStep := req.CurrentStep - 1
-	intNextStep := req.CurrentStep + 1
-
-	// Fetch string value of the previous Step
-	preStep, err := db.Query("SELECT step" + strconv.Itoa(intPreStep) + " FROM flow_" + strings.ToUpper(req.Type))
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-	}
-	for preStep.Next() {
-		err = preStep.Scan(&req.PriorStep)
+	stringPreStep := strconv.Itoa(intPreStep)
+	if intPreStep == 0 {
+		req.PriorStep = "You are the creator of this request"
+	} else {
+		// Fetch string value of the previous Step
+		preStep, err := db.Query("SELECT step" + stringPreStep + " FROM flow_" + strings.ToUpper(req.Type))
 		if err != nil {
+			fmt.Println(err)
 			w.WriteHeader(http.StatusInternalServerError)
+		}
+		for preStep.Next() {
+			err = preStep.Scan(&req.PriorStep)
+			if err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
+			}
 		}
 	}
 
+	intNextStep := req.CurrentStep + 1
+	stringNextStep := strconv.Itoa(intNextStep)
+
 	// Fetch string value of the next Step
-	nextStep, err := db.Query("SELECT step" + strconv.Itoa(intNextStep) + " FROM flow_" + strings.ToUpper(req.Type))
+	nextStep, err := db.Query("SELECT step" + stringNextStep + " FROM flow_" + strings.ToUpper(req.Type))
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 	}
