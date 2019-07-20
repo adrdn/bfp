@@ -16,6 +16,7 @@
             </tbody>
         </table><br>
         <select id="roles" name="role0" style="visibility: hidden;">
+            <option value="" selected disabled>Select the role</option>
            {{ range . }}
             <option value="{{ .Name }}">{{ .Name }}</option>
           {{ end }} 
@@ -32,6 +33,7 @@
        elmnt.style.visibility = "visible";
        var cln = elmnt.cloneNode(true);
        cln.name = "role" + num;
+       cln.required = true;
        var section = document.getElementById("roleSection");
        section.appendChild(cln);
    }
