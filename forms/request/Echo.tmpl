@@ -27,7 +27,7 @@
                             <td>{{ .CurrentStep }}</td>
                             <td>{{ .Status }}</td>
                             <td><a href="/request/detail?id={{ .ID }}">View</a></td>
-                            <td><a href="/request/delete?id={{ .ID }}">Delete</a></td>
+                            <td><a href="/request/delete?id={{ .ID }}" onclick="return confirm('Are you sure?')">Delete</a></td>
                         </tr>
                     {{end}}
                 {{ end }}
