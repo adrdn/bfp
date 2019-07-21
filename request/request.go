@@ -18,6 +18,7 @@ const echoOneRequest = "SELECT ID, type, current_step, description FROM request 
 const addNewRequest = "INSERT INTO request(type, current_step, termination, completion, deletion, description) VALUES(?, ?, ?, ?, ?, ?)"
 const updateRequest = "UPDATE request SET current_step = ?, description = ? WHERE ID = ?"
 const terminateRequest = "UPDATE request SET current_step = 0, termination = ?, description = ? WHERE ID = ?"
+const fetchTotalSteps = "SELECT total_steps from flow_"
 
 var tmpl = template.Must(template.ParseGlob("forms/request/*"))
 
@@ -35,6 +36,7 @@ type Request struct {
 	Description	string
 	IsFirstStep	bool
 	IsLastStep	bool
+	TotalSteps	int
 }
 
 // New starts a new request of the select flow
@@ -76,7 +78,7 @@ func Insert(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	db.Close()
-	http.Redirect(w, r, "/request/view", 301)
+	http.Redirect(w, r, "/requests", 301)
 }
 
 // Echo displays all of the requests
@@ -130,6 +132,20 @@ func ShowDetails(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	totalSteps, err := db.Query(fetchTotalSteps + strings.ToUpper(req.Type))
+	if err != nil {
+		fmt.Println(err)
+		w.WriteHeader(http.StatusInternalServerError)
+	}
+
+	for totalSteps.Next() {
+		err = totalSteps.Scan(&req.TotalSteps)
+		if err != nil {
+			fmt.Println(err)
+			w.WriteHeader(http.StatusInternalServerError)
+		}
+	}
+
 	// If IsFirstStep is true, then show the terminate option on the Detail page
 	if req.CurrentStep == 1 {
 		req.IsFirstStep = true
@@ -151,23 +167,26 @@ func ShowDetails(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	intNextStep := req.CurrentStep + 1
-	stringNextStep := strconv.Itoa(intNextStep)
-
-	// Fetch string value of the next Step
-	nextStep, err := db.Query("SELECT step" + stringNextStep + " FROM flow_" + strings.ToUpper(req.Type))
-	if err != nil {
-		fmt.Println(err)
-		w.WriteHeader(http.StatusInternalServerError)
-	}
-	for nextStep.Next() {
-		err = nextStep.Scan(&req.NextStep)
+	if req.CurrentStep == req.TotalSteps {
+		req.IsLastStep = true
+		req.NextStep = "You have to make the final decision"
+	} else {
+		// Fetch string value of the next Step
+		intNextStep := req.CurrentStep + 1
+		stringNextStep := strconv.Itoa(intNextStep)
+		nextStep, err := db.Query("SELECT step" + stringNextStep + " FROM flow_" + strings.ToUpper(req.Type))
 		if err != nil {
 			fmt.Println(err)
 			w.WriteHeader(http.StatusInternalServerError)
 		}
+		for nextStep.Next() {
+			err = nextStep.Scan(&req.NextStep)
+			if err != nil {
+				fmt.Println(err)
+				w.WriteHeader(http.StatusInternalServerError)
+			}
+		}
 	}
-
 	db.Close()
 	tmpl.ExecuteTemplate(w, "Detail", req)
 }
@@ -216,5 +235,5 @@ func Update(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	defer db.Close()
-	http.Redirect(w, r, "/request/view", 301)
+	http.Redirect(w, r, "/requests", 301)
 }

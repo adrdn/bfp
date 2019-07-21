@@ -7,7 +7,7 @@
             <p>Flow Name: <b>{{ .Type }}</b></p>
         </div>
         <div class="routing">
-            <p>Current Step: {{ .CurrentStep }}</p>
+            <p>Current Step: <b>{{ .CurrentStep }}</b></p>
             <p>Prior Step: <b>{{ .PriorStep }}</b> & Next Step: <b>{{ .NextStep }}</b></p>
         </div>
         <div class="description">
@@ -24,7 +24,10 @@
                 <input type="radio" name="decision" value="approve">Approve<br>
                 <input type="radio" name="decision" value="reject">Reject<br>
                 {{ if eq .IsFirstStep true}}
-                <input type="radio" name="decision" value="terminate">Terminate
+                <input type="radio" name="decision" value="terminate">Terminate<br>
+                {{ end }}
+                {{ if eq .IsLastStep true }}
+                <input type="radio" name="decision" value="complete">Finalize
                 {{ end }}
             </div>
         </form><br>
