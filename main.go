@@ -41,6 +41,7 @@ func main() {
 	http.HandleFunc("/request/view", request.Echo)
 	http.HandleFunc("/request/detail", request.ShowDetails)
 	http.HandleFunc("/request/update", request.Update)
+	http.HandleFunc("/request/delete", request.Delete)
 
 	http.ListenAndServe(":8000", nil)
 }

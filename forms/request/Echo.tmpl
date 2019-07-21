@@ -15,17 +15,21 @@
                     <td><b>Current Step</b></td>
                     <td><b>Status</b></td>
                     <td><b>View</b></td>
+                    <td><b>Delete</b></td>
                 </tr>
             </thead>
             <tbody>
                 {{ range . }}
-                    <tr>
-                        <td>{{ .ID }}</td>
-                        <td>{{ .Type }}</td>
-                        <td>{{ .CurrentStep }}</td>
-                        <td>{{ .Status }}</td>
-                        <td><a href="/request/detail?id={{ .ID }}">View</a></td>
-                    </tr>
+                    {{if eq .IsDeleted false}}
+                        <tr>
+                            <td>{{ .ID }}</td>
+                            <td>{{ .Type }}</td>
+                            <td>{{ .CurrentStep }}</td>
+                            <td>{{ .Status }}</td>
+                            <td><a href="/request/detail?id={{ .ID }}">View</a></td>
+                            <td><a href="/request/delete?id={{ .ID }}">Delete</a></td>
+                        </tr>
+                    {{end}}
                 {{ end }}
             </tbody>
         </table>

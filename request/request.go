@@ -20,24 +20,26 @@ const updateRequest = "UPDATE request SET current_step = ?, description = ? WHER
 const terminateRequest = "UPDATE request SET current_step = 0, termination = ?, description = ? WHERE ID = ?"
 const finishRequest = "UPDATE request SET current_step = 0, completion = ?, description = ? WHERE ID = ?"
 const fetchTotalSteps = "SELECT total_steps from flow_"
+const deleteRequest = "UPDATE request SET deletion = ? WHERE ID = ?"
 
 var tmpl = template.Must(template.ParseGlob("forms/request/*"))
 
 // Request represents the request structure
 type Request struct {
-	ID	 		int
-	Type 		string
-	PriorStep	string
-	CurrentStep int
-	NextStep	string
-	Termination string
-	Completion	string
-	Deletion	string
-	Status		string
-	Description	string
-	IsFirstStep	bool
-	IsLastStep	bool
-	TotalSteps	int
+	ID	 			int
+	Type 			string
+	PriorStep		string
+	CurrentStep 	int
+	NextStep		string
+	Termination 	string
+	Completion		string
+	Deletion		string
+	Status			string
+	Description		string
+	IsFirstStep		bool
+	IsLastStep		bool
+	TotalSteps		int
+	IsDeleted		bool
 }
 
 // New starts a new request of the select flow
@@ -100,6 +102,12 @@ func Echo(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusInternalServerError)
 		}
 
+		if req.Deletion != "" {
+			req.IsDeleted = true
+		} else {
+			req.IsDeleted = false
+		}
+
 		if req.Termination == "" && req.Completion == "" {
 			req.Status = "In Process"
 		} else if req.Termination != "" {
@@ -109,6 +117,7 @@ func Echo(w http.ResponseWriter, r *http.Request) {
 		}
 		reqList = append(reqList, req)
 	}
+
 	db.Close()
 	tmpl.ExecuteTemplate(w, "Echo", reqList)
 }
@@ -249,5 +258,21 @@ func Update(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	defer db.Close()
+	http.Redirect(w, r, "/request/view", 301)
+}
+
+// Delete soft-deletes a request
+func Delete(w http.ResponseWriter, r *http.Request) {
+	db := config.DbConn()
+	ID := r.URL.Query().Get("id")
+	t := time.Now().Format("2006-01-02 15:04:05")
+	request, err := db.Prepare(deleteRequest)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+	}
+	_, err = request.Exec(t, ID)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+	}
 	http.Redirect(w, r, "/request/view", 301)
 }
