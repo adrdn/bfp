@@ -18,6 +18,7 @@ const echoOneRequest = "SELECT ID, type, current_step, description FROM request 
 const addNewRequest = "INSERT INTO request(type, current_step, termination, completion, deletion, description) VALUES(?, ?, ?, ?, ?, ?)"
 const updateRequest = "UPDATE request SET current_step = ?, description = ? WHERE ID = ?"
 const terminateRequest = "UPDATE request SET current_step = 0, termination = ?, description = ? WHERE ID = ?"
+const finishRequest = "UPDATE request SET current_step = 0, completion = ?, description = ? WHERE ID = ?"
 const fetchTotalSteps = "SELECT total_steps from flow_"
 
 var tmpl = template.Must(template.ParseGlob("forms/request/*"))
@@ -78,7 +79,7 @@ func Insert(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	db.Close()
-	http.Redirect(w, r, "/requests", 301)
+	http.Redirect(w, r, "/request/view", 301)
 }
 
 // Echo displays all of the requests
@@ -219,7 +220,7 @@ func Update(w http.ResponseWriter, r *http.Request) {
 				fmt.Println(err)
 				w.WriteHeader(http.StatusInternalServerError)
 			}
-		} else {
+		} else if decision == "terminate" {
 			request, err := db.Prepare(terminateRequest)
 			if err != nil {
 				fmt.Println(err)
@@ -232,8 +233,21 @@ func Update(w http.ResponseWriter, r *http.Request) {
 				fmt.Println(err)
 				w.WriteHeader(http.StatusInternalServerError)
 			}
+		} else {
+			request, err := db.Prepare(finishRequest)
+			if err != nil {
+				fmt.Println(err)
+				w.WriteHeader(http.StatusInternalServerError)
+			}
+			t := time.Now()
+			dateTimeLatout := t.Format("2006-01-02 15:04:05")
+			_, err = request.Exec(dateTimeLatout, description, ID)
+			if err != nil {
+				fmt.Println(err)
+				w.WriteHeader(http.StatusInternalServerError)
+			}
 		}
 	}
 	defer db.Close()
-	http.Redirect(w, r, "/requests", 301)
+	http.Redirect(w, r, "/request/view", 301)
 }

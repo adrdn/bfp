@@ -38,7 +38,7 @@ func main() {
 
 	http.HandleFunc("/request/new", request.New)
 	http.HandleFunc("/request/process", request.Insert)
-	http.HandleFunc("/requests", request.Echo)
+	http.HandleFunc("/request/view", request.Echo)
 	http.HandleFunc("/request/detail", request.ShowDetails)
 	http.HandleFunc("/request/update", request.Update)
 

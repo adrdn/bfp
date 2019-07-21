@@ -22,14 +22,14 @@
             </div>
             <div class="decision">
                 {{if eq .IsLastStep true}}
-                    <input type="radio" name="decision" value="complete">Finalize<br><br>
+                    <input type="radio" name="decision" value="complete" required>Finalize<br><br>
                 {{else}}
-                    <input type="radio" name="decision" value="approve">Approve<br><br>
+                    <input type="radio" name="decision" value="approve" required>Approve<br><br>
                 {{end}}
                 {{if eq .IsFirstStep true}}
-                    <input type="radio" name="decision" value="terminate">Terminate
+                    <input type="radio" name="decision" value="terminate" required>Terminate
                 {{else}}
-                    <input type="radio" name="decision" value="reject">Reject
+                    <input type="radio" name="decision" value="reject" required>Reject
                 {{end}}
             </div>
         </form><br>
