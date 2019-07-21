@@ -15,7 +15,7 @@ import (
 const echoAllFlow = "SELECT * FROM flow"
 const echoALLRequest = "SELECT * FROM request"
 const echoOneRequest = "SELECT ID, type, current_step, description FROM request WHERE ID = ?"
-const addNewRequest = "INSERT INTO request(type, current_step, description) VALUES(?, ?, ?)"
+const addNewRequest = "INSERT INTO request(type, current_step, termination, completion, deletion, description) VALUES(?, ?, ?, ?, ?, ?)"
 const updateRequest = "UPDATE request SET current_step = ?, description = ? WHERE ID = ?"
 const terminateRequest = "UPDATE request SET current_step = 0, termination = ?, description = ? WHERE ID = ?"
 
@@ -70,7 +70,7 @@ func Insert(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusInternalServerError)
 		}
 		// current_step is assinged to 2 because at this stage the request is already created
-		_, err = newRequest.Exec(selectedFlow, 2, description)
+		_, err = newRequest.Exec(selectedFlow, 2, "", "", "", description)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 		}

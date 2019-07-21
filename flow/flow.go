@@ -91,7 +91,8 @@ func Insert (w http.ResponseWriter, r *http.Request) {
 		
 		// define query of columns with their data type
 		columns := strings.Join(steps, " varchar(255), ")
-		str.WriteString(columns + " varchar(255))")
+		str.WriteString(columns + " varchar(255), ")
+		str.WriteString("total_steps int)")
 
 		// create a table with the given name and column number
 		db.Query(str.String())
@@ -109,6 +110,7 @@ func Insert (w http.ResponseWriter, r *http.Request) {
 			str = r.FormValue("role" + strconv.Itoa(i))
 			values = append(values, "'" + str + "'")
 		}
+		values = append(values, numberString)
 
 		query := generatePopulateTableQuery(values, nameUpper)
 		_, err = db.Query(query)
