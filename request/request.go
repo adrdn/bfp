@@ -2,6 +2,7 @@ package request
 
 import (
 	"fmt"
+	"time"
 	"strings"
 	"strconv"
 	"net/http"
@@ -16,6 +17,7 @@ const echoALLRequest = "SELECT * FROM request"
 const echoOneRequest = "SELECT ID, type, current_step, description FROM request WHERE ID = ?"
 const addNewRequest = "INSERT INTO request(type, current_step, description) VALUES(?, ?, ?)"
 const updateRequest = "UPDATE request SET current_step = ?, description = ? WHERE ID = ?"
+const terminateRequest = "UPDATE request SET current_step = 0, termination = ?, description = ? WHERE ID = ?"
 
 var tmpl = template.Must(template.ParseGlob("forms/request/*"))
 
@@ -26,9 +28,9 @@ type Request struct {
 	PriorStep	string
 	CurrentStep int
 	NextStep	string
-	Termination int
-	Completion	int
-	Deletion	int
+	Termination string
+	Completion	string
+	Deletion	string
 	Status		string
 	Description	string
 	IsFirstStep	bool
@@ -94,9 +96,10 @@ func Echo(w http.ResponseWriter, r *http.Request) {
 			fmt.Println(err)
 			w.WriteHeader(http.StatusInternalServerError)
 		}
-		if req.Termination == 0 && req.Completion == 0 {
+
+		if req.Termination == "" && req.Completion == "" {
 			req.Status = "In Process"
-		} else if req.Termination != 0 {
+		} else if req.Termination != "" {
 			req.Status = "Terminated"	
 		} else {
 			req.Status = "Completed"
@@ -116,11 +119,13 @@ func ShowDetails(w http.ResponseWriter, r *http.Request) {
 
 	request, err := db.Query(echoOneRequest, ID)
 	if err != nil {
+		fmt.Println(err)
 		w.WriteHeader(http.StatusInternalServerError)
 	}
 	for request.Next() {
 		err = request.Scan(&req.ID, &req.Type, &req.CurrentStep, &req.Description)
 		if err != nil {
+			fmt.Println(err)
 			w.WriteHeader(http.StatusInternalServerError)
 		}
 	}
@@ -128,14 +133,11 @@ func ShowDetails(w http.ResponseWriter, r *http.Request) {
 	// If IsFirstStep is true, then show the terminate option on the Detail page
 	if req.CurrentStep == 1 {
 		req.IsFirstStep = true
-	}
-
-	intPreStep := req.CurrentStep - 1
-	stringPreStep := strconv.Itoa(intPreStep)
-	if intPreStep == 0 {
 		req.PriorStep = "You are the creator of this request"
 	} else {
 		// Fetch string value of the previous Step
+		intPreStep := req.CurrentStep - 1
+		stringPreStep := strconv.Itoa(intPreStep)	
 		preStep, err := db.Query("SELECT step" + stringPreStep + " FROM flow_" + strings.ToUpper(req.Type))
 		if err != nil {
 			fmt.Println(err)
@@ -155,11 +157,13 @@ func ShowDetails(w http.ResponseWriter, r *http.Request) {
 	// Fetch string value of the next Step
 	nextStep, err := db.Query("SELECT step" + stringNextStep + " FROM flow_" + strings.ToUpper(req.Type))
 	if err != nil {
+		fmt.Println(err)
 		w.WriteHeader(http.StatusInternalServerError)
 	}
 	for nextStep.Next() {
 		err = nextStep.Scan(&req.NextStep)
 		if err != nil {
+			fmt.Println(err)
 			w.WriteHeader(http.StatusInternalServerError)
 		}
 	}
@@ -178,24 +182,37 @@ func Update(w http.ResponseWriter, r *http.Request) {
 		intCurrentStep, _ := strconv.Atoi(currentStep)
 		description := r.FormValue("description")
 		decision := r.FormValue("decision")
-		if decision == "approve" {
-			intCurrentStep++
-			currentStep = strconv.Itoa(intCurrentStep)
-		} else if decision == "reject" {
+		if decision == "approve" || decision == "reject" {
+			if decision == "approve" {
+				intCurrentStep++
+				currentStep = strconv.Itoa(intCurrentStep)
+			} else if decision == "reject" {
 			intCurrentStep--
 			currentStep = strconv.Itoa(intCurrentStep)
+			}
+			request, err := db.Prepare(updateRequest)
+			if err != nil {
+				fmt.Println(err)
+				w.WriteHeader(http.StatusInternalServerError)
+			}
+			_, err = request.Exec(currentStep, description, ID)
+			if err != nil {
+				fmt.Println(err)
+				w.WriteHeader(http.StatusInternalServerError)
+			}
 		} else {
-
-		}
-		request, err := db.Prepare(updateRequest)
-		if err != nil {
-			fmt.Println(err)
-			w.WriteHeader(http.StatusInternalServerError)
-		}
-		_, err = request.Exec(currentStep, description, ID)
-		if err != nil {
-			fmt.Println(err)
-			w.WriteHeader(http.StatusInternalServerError)
+			request, err := db.Prepare(terminateRequest)
+			if err != nil {
+				fmt.Println(err)
+				w.WriteHeader(http.StatusInternalServerError)
+			}
+			t := time.Now()
+			dateTimeLayout := t.Format("2006-01-02 15:04:05")
+			_, err = request.Exec(dateTimeLayout, description, ID)
+			if err != nil {
+				fmt.Println(err)
+				w.WriteHeader(http.StatusInternalServerError)
+			}
 		}
 	}
 	defer db.Close()
