@@ -21,14 +21,16 @@
                 <textarea name="description" cols="70" rows="10"></textarea>
             </div>
             <div class="decision">
-                <input type="radio" name="decision" value="approve">Approve<br>
-                <input type="radio" name="decision" value="reject">Reject<br>
-                {{ if eq .IsFirstStep true}}
-                <input type="radio" name="decision" value="terminate">Terminate<br>
-                {{ end }}
-                {{ if eq .IsLastStep true }}
-                <input type="radio" name="decision" value="complete">Finalize
-                {{ end }}
+                {{if eq .IsLastStep true}}
+                    <input type="radio" name="decision" value="complete">Finalize<br><br>
+                {{else}}
+                    <input type="radio" name="decision" value="approve">Approve<br><br>
+                {{end}}
+                {{if eq .IsFirstStep true}}
+                    <input type="radio" name="decision" value="terminate">Terminate
+                {{else}}
+                    <input type="radio" name="decision" value="reject">Reject
+                {{end}}
             </div>
         </form><br>
         <button type="submit" form="request" autofocus>Submit</button>
