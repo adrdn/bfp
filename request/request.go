@@ -31,6 +31,8 @@ type Request struct {
 	Deletion	int
 	Status		string
 	Description	string
+	IsFirstStep	bool
+	IsLastStep	bool
 }
 
 // New starts a new request of the select flow
@@ -123,6 +125,11 @@ func ShowDetails(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	// If IsFirstStep is true, then show the terminate option on the Detail page
+	if req.CurrentStep == 1 {
+		req.IsFirstStep = true
+	}
+
 	intPreStep := req.CurrentStep - 1
 	stringPreStep := strconv.Itoa(intPreStep)
 	if intPreStep == 0 {
@@ -174,10 +181,12 @@ func Update(w http.ResponseWriter, r *http.Request) {
 		if decision == "approve" {
 			intCurrentStep++
 			currentStep = strconv.Itoa(intCurrentStep)
-		} else {
+		} else if decision == "reject" {
 			intCurrentStep--
 			currentStep = strconv.Itoa(intCurrentStep)
-		} 
+		} else {
+
+		}
 		request, err := db.Prepare(updateRequest)
 		if err != nil {
 			fmt.Println(err)
