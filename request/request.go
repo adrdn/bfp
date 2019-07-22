@@ -14,13 +14,17 @@ import (
 
 const echoAllFlow = "SELECT * FROM flow"
 const echoALLRequest = "SELECT * FROM request"
-const echoOneRequest = "SELECT ID, type, current_step, description FROM request WHERE ID = ?"
+const echoOneRequest = "SELECT ID, type, current_step, termination, completion, description FROM request WHERE ID = ?"
 const addNewRequest = "INSERT INTO request(type, current_step, termination, completion, deletion, description) VALUES(?, ?, ?, ?, ?, ?)"
 const updateRequest = "UPDATE request SET current_step = ?, description = ? WHERE ID = ?"
 const terminateRequest = "UPDATE request SET current_step = 0, termination = ?, description = ? WHERE ID = ?"
 const finishRequest = "UPDATE request SET current_step = 0, completion = ?, description = ? WHERE ID = ?"
 const fetchTotalSteps = "SELECT total_steps from flow_"
 const deleteRequest = "UPDATE request SET deletion = ? WHERE ID = ?"
+
+const terminatedStatus 	=	"Terminated"
+const completedStatus 	=	"Completed"
+const runningStatus		=	"In Process"
 
 var tmpl = template.Must(template.ParseGlob("forms/request/*"))
 
@@ -109,11 +113,11 @@ func Echo(w http.ResponseWriter, r *http.Request) {
 		}
 
 		if req.Termination == "" && req.Completion == "" {
-			req.Status = "In Process"
+			req.Status = runningStatus
 		} else if req.Termination != "" {
-			req.Status = "Terminated"	
+			req.Status = terminatedStatus	
 		} else {
-			req.Status = "Completed"
+			req.Status = completedStatus
 		}
 		reqList = append(reqList, req)
 	}
@@ -135,70 +139,81 @@ func ShowDetails(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	}
 	for request.Next() {
-		err = request.Scan(&req.ID, &req.Type, &req.CurrentStep, &req.Description)
+		err = request.Scan(&req.ID, &req.Type, &req.CurrentStep, &req.Termination, &req.Completion, &req.Description)
 		if err != nil {
 			fmt.Println(err)
 			w.WriteHeader(http.StatusInternalServerError)
 		}
 	}
 
-	totalSteps, err := db.Query(fetchTotalSteps + strings.ToUpper(req.Type))
-	if err != nil {
-		fmt.Println(err)
-		w.WriteHeader(http.StatusInternalServerError)
-	}
-
-	for totalSteps.Next() {
-		err = totalSteps.Scan(&req.TotalSteps)
-		if err != nil {
-			fmt.Println(err)
-			w.WriteHeader(http.StatusInternalServerError)
+	if req.Termination != "" || req.Completion != "" {
+		if req.Termination != "" {
+			req.Status = terminatedStatus
+		} else {
+			req.Status = completedStatus
 		}
-	}
-
-	// If IsFirstStep is true, then show the terminate option on the Detail page
-	if req.CurrentStep == 1 {
-		req.IsFirstStep = true
-		req.PriorStep = "You are the creator of this request"
+		defer db.Close()
+		tmpl.ExecuteTemplate(w, "Finished", req)
 	} else {
-		// Fetch string value of the previous Step
-		intPreStep := req.CurrentStep - 1
-		stringPreStep := strconv.Itoa(intPreStep)	
-		preStep, err := db.Query("SELECT step" + stringPreStep + " FROM flow_" + strings.ToUpper(req.Type))
+		totalSteps, err := db.Query(fetchTotalSteps + strings.ToUpper(req.Type))
 		if err != nil {
 			fmt.Println(err)
 			w.WriteHeader(http.StatusInternalServerError)
 		}
-		for preStep.Next() {
-			err = preStep.Scan(&req.PriorStep)
-			if err != nil {
-				w.WriteHeader(http.StatusInternalServerError)
-			}
-		}
-	}
 
-	if req.CurrentStep == req.TotalSteps {
-		req.IsLastStep = true
-		req.NextStep = "You have to make the final decision"
-	} else {
-		// Fetch string value of the next Step
-		intNextStep := req.CurrentStep + 1
-		stringNextStep := strconv.Itoa(intNextStep)
-		nextStep, err := db.Query("SELECT step" + stringNextStep + " FROM flow_" + strings.ToUpper(req.Type))
-		if err != nil {
-			fmt.Println(err)
-			w.WriteHeader(http.StatusInternalServerError)
-		}
-		for nextStep.Next() {
-			err = nextStep.Scan(&req.NextStep)
+		for totalSteps.Next() {
+			err = totalSteps.Scan(&req.TotalSteps)
 			if err != nil {
 				fmt.Println(err)
 				w.WriteHeader(http.StatusInternalServerError)
 			}
 		}
+
+		// If IsFirstStep is true, then show the terminate option on the Detail page
+		if req.CurrentStep == 1 {
+			req.IsFirstStep = true
+			req.PriorStep = "You are the creator of this request"
+		} else {
+			// Fetch string value of the previous Step
+			intPreStep := req.CurrentStep - 1
+			stringPreStep := strconv.Itoa(intPreStep)	
+			preStep, err := db.Query("SELECT step" + stringPreStep + " FROM flow_" + strings.ToUpper(req.Type))
+			if err != nil {
+				fmt.Println(err)
+				w.WriteHeader(http.StatusInternalServerError)
+			}
+			for preStep.Next() {
+				err = preStep.Scan(&req.PriorStep)
+				if err != nil {
+					w.WriteHeader(http.StatusInternalServerError)
+				}
+			}
+		}
+
+		// If IsLastStep is true, then show the Finalize option on the Detail page
+		if req.CurrentStep == req.TotalSteps {
+			req.IsLastStep = true
+			req.NextStep = "You have to make the final decision"
+		} else {
+			// Fetch string value of the next Step
+			intNextStep := req.CurrentStep + 1
+			stringNextStep := strconv.Itoa(intNextStep)
+			nextStep, err := db.Query("SELECT step" + stringNextStep + " FROM flow_" + strings.ToUpper(req.Type))
+			if err != nil {
+				fmt.Println(err)
+				w.WriteHeader(http.StatusInternalServerError)
+			}
+			for nextStep.Next() {
+				err = nextStep.Scan(&req.NextStep)
+				if err != nil {
+					fmt.Println(err)
+					w.WriteHeader(http.StatusInternalServerError)
+				}
+			}
+		}
+		db.Close()
+		tmpl.ExecuteTemplate(w, "Detail", req)
 	}
-	db.Close()
-	tmpl.ExecuteTemplate(w, "Detail", req)
 }
 
 // Update changes the request based on user decision

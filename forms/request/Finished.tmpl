@@ -1,0 +1,20 @@
+{{ define "Finished" }}
+<!DOCTYPE html>
+<html lang="en-US">
+    <head></head>
+    <body>
+        <div class="type">
+            <p>Flow Type: <b>{{ .Type }}</b></p>
+        </div>
+        <div class="ID">
+            <p>Request Number: <b>{{ .ID }}</b></p>
+        </div>
+        <div class="status">
+            <p>This request is <b>{{ .Status }}</b> on <b>{{ .Termination }} {{ .Completion }}</b></p>
+        </div>
+        <div class="description">
+            <p>Final Notes: <b>{{ .Description }}</b></p>
+        </div>
+    </body>
+</html>
+{{ end }}
