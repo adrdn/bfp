@@ -19,7 +19,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 
 // Authentication decides if the user can login or not
 func Authentication(w http.ResponseWriter, r *http.Request) {
-	var creds Credentials
+	//var creds Credentials
 
 	db := config.DbConn()
 	var hashedPassword string
@@ -43,13 +43,17 @@ func Authentication(w http.ResponseWriter, r *http.Request) {
 		if err = bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password)); err != nil {
 			defer db.Close()
 			w.WriteHeader(http.StatusUnauthorized)
-			fmt.Println(err)
+			if err.Error() == "crypto/bcrypt: hashedPassword is not the hash of the given password" {
+				fmt.Println("Invalid Password")
+			} else {
+				fmt.Println("Invalid Username")
+			}
 			return
 		} 
 		expirationTime := time.Now().Add(30 * time.Second)
 
 		claims := &Claims{
-			Username: creds.Username,
+			Username: username,
 			StandardClaims: jwt.StandardClaims{
 				ExpiresAt: expirationTime.Unix(),
 			},
@@ -111,6 +115,7 @@ func Home(w http.ResponseWriter, r *http.Request) {
 		fmt.Println(err)
 		return
 	}
+	fmt.Println("Username: ")
 	tmpl.ExecuteTemplate(w, "Home", nil)
 }
 
