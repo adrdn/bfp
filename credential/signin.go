@@ -43,9 +43,9 @@ func Authentication(w http.ResponseWriter, r *http.Request) {
 		if err = bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password)); err != nil {
 			defer db.Close()
 			w.WriteHeader(http.StatusUnauthorized)
-			if err.Error() == "crypto/bcrypt: hashedPassword is not the hash of the given password" {
+			if err == bcrypt.ErrMismatchedHashAndPassword {
 				fmt.Println("Invalid Password")
-			} else {
+			} else if err == bcrypt.ErrHashTooShort {
 				fmt.Println("Invalid Username")
 			}
 			return
