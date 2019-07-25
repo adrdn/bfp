@@ -19,7 +19,7 @@ func main() {
 	http.HandleFunc("/login", credential.Login)
 	http.HandleFunc("/auth", credential.Authentication)
 	http.HandleFunc("/home", credential.Home)
-	http.HandleFunc("/logout", credential.Logout)
+	http.HandleFunc("/refresh", credential.Refresh)
 	
 	http.HandleFunc("/admin/users", user.DisplayAllUsers)
 	http.HandleFunc("/admin/users/delete", user.DeleteUser)
