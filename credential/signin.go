@@ -78,7 +78,25 @@ func Authentication(w http.ResponseWriter, r *http.Request) {
 
 // Home revokes the home page
 func Home(w http.ResponseWriter, r *http.Request) {
-	tmpl.ExecuteTemplate(w, "Home", nil)
+	session, err := store.Get(r, "dit")
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	user := getUser(session)
+	
+	if auth := user.Authenticated; !auth {
+		session.AddFlash("You don't have access:D")
+		err = session.Save(r, w)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		http.Redirect(w, r, "/", http.StatusFound)
+		return
+	}
+
+	tmpl.ExecuteTemplate(w, "Home", user.Username)
 }
 
 
