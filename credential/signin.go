@@ -13,7 +13,7 @@ const listOneUser = "SELECT password FROM user where username = ?"
 
 // Login revokes the login page
 func Login(w http.ResponseWriter, r *http.Request) {
-	session, err := store.Get(r, "dit")
+	session, err := Store.Get(r, "dit")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -26,7 +26,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 func Authentication(w http.ResponseWriter, r *http.Request) {
 	db := config.DbConn()
 	var hashedPassword string
-	session, err := store.Get(r, "dit")
+	session, err := Store.Get(r, "dit")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -78,31 +78,17 @@ func Authentication(w http.ResponseWriter, r *http.Request) {
 
 // Home revokes the home page
 func Home(w http.ResponseWriter, r *http.Request) {
-	session, err := store.Get(r, "dit")
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+	ok, user := CheckAuthentication(w, r)
+	if !ok {
 		return
 	}
-	user := getUser(session)
-	
-	if auth := user.Authenticated; !auth {
-		session.AddFlash("You don't have access:D")
-		err = session.Save(r, w)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-		http.Redirect(w, r, "/", http.StatusFound)
-		return
-	}
-
 	tmpl.ExecuteTemplate(w, "Home", user.Username)
 }
 
 
 // Logout signs the user out
 func Logout(w http.ResponseWriter, r *http.Request) {
-	_, err := store.Get(r, "dit")
+	_, err := Store.Get(r, "dit")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
