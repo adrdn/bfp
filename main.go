@@ -13,13 +13,13 @@ import (
 
 func main() {
 	log.Println("Server is started on: http://localhost:8000")
-
+	
+	http.HandleFunc("/", credential.Login)
+	http.HandleFunc("/home", credential.Home)
 	http.HandleFunc("/register", credential.SignUp)
 	http.HandleFunc("/signup", credential.RegisterNewUser)
-	http.HandleFunc("/login", credential.Login)
 	http.HandleFunc("/auth", credential.Authentication)
-	http.HandleFunc("/home", credential.Home)
-	http.HandleFunc("/logout", credential.Logout)
+	//http.HandleFunc("/logout", credential.Logout)
 	
 	http.HandleFunc("/admin/users", user.DisplayAllUsers)
 	http.HandleFunc("/admin/users/delete", user.DeleteUser)

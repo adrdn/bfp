@@ -12,10 +12,11 @@ const deleteUser = "DELETE FROM user WHERE id = ?"
 
 // User represents the user structure
 type User struct {
-	ID       int
-	Name     string
-	Username string
-	Password string
+	ID       		int
+	Name     		string
+	Username 		string
+	Password 		string
+	Authenticated 	bool
 }
 
 var tmpl = template.Must(template.ParseGlob("forms/admin/user/*"))

@@ -2,7 +2,6 @@ package credential
 
 import (
 	"net/http"
-	"text/template"
 
 	"adrdn/dit/config"
 
@@ -12,8 +11,6 @@ import (
 )
 
 const addNewUser = "INSERT INTO user(name, username, password) VALUES (?, ?, ?)"
-
-var tmpl = template.Must(template.ParseGlob("forms/credential/*"))
 
 // SignUp represent the sign up page
 func SignUp(w http.ResponseWriter, r *http.Request) {

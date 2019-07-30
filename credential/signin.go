@@ -9,11 +9,16 @@ import (
 )
 
 const listOneUser = "SELECT password FROM user where username = ?"
-var Authenticated bool
 
 // Login revokes the login page
 func Login(w http.ResponseWriter, r *http.Request) {
-	tmpl.ExecuteTemplate(w, "Login", nil)
+	session, err := store.Get(r, "dit")
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	user := getUser(session)
+	tmpl.ExecuteTemplate(w, "Login", user)
 }
 
 // Authentication decides if the user can login or not
@@ -42,7 +47,6 @@ func Authentication(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), 500)
 		} else {
 			defer db.Close()
-			Authenticated = true
 			http.Redirect(w, r, "/home", 301)
 		}
 		
@@ -51,15 +55,5 @@ func Authentication(w http.ResponseWriter, r *http.Request) {
 
 // Home revokes the home page
 func Home(w http.ResponseWriter, r *http.Request) {
-	if Authenticated {
-		tmpl.ExecuteTemplate(w, "Home", nil)
-	} else {
-		http.Redirect(w, r, "/login", 301)
-	}
-}
-
-// Logout signs out the user
-func Logout(w http.ResponseWriter, r *http.Request) {
-	Authenticated = false
-	http.Redirect(w, r, "/login", 301)
+	tmpl.ExecuteTemplate(w, "Home", nil)
 }
