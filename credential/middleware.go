@@ -20,7 +20,8 @@ func init() {
 	store = sessions.NewCookieStore(authenticationKey, encryptionKey)
 	store.Options = &sessions.Options {
 		Path: 		"/",
-		MaxAge:		86400 * 7,
+		// MaxAge:		86400 * 7,
+		MaxAge:		60 * 1,
 		HttpOnly:	true,	 
 	}
 	gob.Register(user.User{})
@@ -29,8 +30,8 @@ func init() {
 }
 
 func getUser(s *sessions.Session) user.User {
-	u 		:= user.User{}
-	value 	:= s.Values["name"]
+	var u	 = user.User{}
+	value 	:= s.Values["user"]
 	u, ok 	:= value.(user.User)
 	if !ok {
 		return user.User{Authenticated: false}

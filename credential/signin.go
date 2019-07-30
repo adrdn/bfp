@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"adrdn/dit/config"
+	"adrdn/dit/user"
 
 	"golang.org/x/crypto/bcrypt"
 )
@@ -25,6 +26,11 @@ func Login(w http.ResponseWriter, r *http.Request) {
 func Authentication(w http.ResponseWriter, r *http.Request) {
 	db := config.DbConn()
 	var hashedPassword string
+	session, err := store.Get(r, "dit")
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 
 	if r.Method == "POST" {
 		username := r.FormValue("username")
@@ -44,16 +50,45 @@ func Authentication(w http.ResponseWriter, r *http.Request) {
 
 		if err = bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password)); err != nil {
 			defer db.Close()
-			http.Error(w, err.Error(), 500)
-		} else {
-			defer db.Close()
-			http.Redirect(w, r, "/home", 301)
+			session.AddFlash("The username or password is incorrect")
+			err = session.Save(r, w)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+
+			http.Redirect(w, r, "/", http.StatusFound)
+			return
 		}
 		
+		defer db.Close()
+		u := user.User{
+			Username:		username,
+			Authenticated:	true,
+		}
+		session.Values["user"] = u
+		err = session.Save(r, w)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		http.Redirect(w, r, "/home", http.StatusFound)
 	}
 }
 
 // Home revokes the home page
 func Home(w http.ResponseWriter, r *http.Request) {
 	tmpl.ExecuteTemplate(w, "Home", nil)
+}
+
+
+// Logout signs the user out
+func Logout(w http.ResponseWriter, r *http.Request) {
+	_, err := store.Get(r, "dit")
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	
 }
