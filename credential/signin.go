@@ -88,11 +88,19 @@ func Home(w http.ResponseWriter, r *http.Request) {
 
 // Logout signs the user out
 func Logout(w http.ResponseWriter, r *http.Request) {
-	_, err := Store.Get(r, "dit")
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
+	session, err := Store.Get(r, "dit")
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
 
-	
+		session.Values["user"] = user.User{}
+		session.Options.MaxAge = -1
+
+		err = session.Save(r, w)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		http.Redirect(w, r, "/", http.StatusFound)
 }

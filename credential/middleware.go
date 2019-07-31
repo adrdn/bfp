@@ -49,9 +49,8 @@ func CheckAuthentication(w http.ResponseWriter, r *http.Request) (bool, user.Use
 		}
 		http.Redirect(w, r, "/", http.StatusFound)
 		return false, u
-	} else {
-		return true, u
-	}
+	} 
+	return true, u
 }
 
 func getUser(s *sessions.Session) user.User {
