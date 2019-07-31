@@ -14,7 +14,11 @@ const addNewUser = "INSERT INTO user(name, username, password) VALUES (?, ?, ?)"
 
 // SignUp represent the sign up page
 func SignUp(w http.ResponseWriter, r *http.Request) {
-	tmpl.ExecuteTemplate(w, "SignUp", nil)
+	ok, user := CheckAuthentication(w, r)
+	if !ok {
+		return
+	}
+	tmpl.ExecuteTemplate(w, "SignUp", user)
 }
 
 // RegisterNewUser registers the user

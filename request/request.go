@@ -34,6 +34,7 @@ type Request struct {
 	Type 			string
 	PriorStep		string
 	CurrentStep 	int
+	StrCurrentStep	string
 	NextStep		string
 	Termination 	string
 	Completion		string
@@ -163,6 +164,19 @@ func ShowDetails(w http.ResponseWriter, r *http.Request) {
 
 		for totalSteps.Next() {
 			err = totalSteps.Scan(&req.TotalSteps)
+			if err != nil {
+				fmt.Println(err)
+				w.WriteHeader(http.StatusInternalServerError)
+			}
+		}
+
+		currentStep, err := db.Query("SELECT step" + strconv.Itoa(req.CurrentStep) + " FROM flow_" + strings.ToUpper(req.Type))
+		if err != nil {
+			fmt.Println(err)
+			w.WriteHeader(http.StatusInternalServerError)
+		}
+		for currentStep.Next() {
+			err = currentStep.Scan(&req.StrCurrentStep)
 			if err != nil {
 				fmt.Println(err)
 				w.WriteHeader(http.StatusInternalServerError)
