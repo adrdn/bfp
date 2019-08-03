@@ -105,6 +105,23 @@ func Insert(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 
+		// Fetch the Pending value from the role table
+		pending, err := db.Query("SELECT Pending FROM role WHERE NAME = ?", rName)
+		if err != nil {
+			fmt.Println("-1", err)
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		var pendingValue string
+		for pending.Next() {
+			err = pending.Scan(&pendingValue)
+			if err != nil {
+				fmt.Println("0", err)
+				w.WriteHeader(http.StatusInternalServerError)
+				return
+			}
+		}
+
 		// Update the role table with the given request ID
 		id, err := res.LastInsertId()
 		if err != nil {
@@ -114,15 +131,24 @@ func Insert(w http.ResponseWriter, r *http.Request) {
 		}
 		updRequest, err := db.Prepare("UPDATE role SET Pending = ? WHERE NAME = ?")
 		if err != nil {
-			fmt.Println(err)
+			fmt.Println("1", err)
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
-		_, err = updRequest.Exec(id, rName)
-		if err != nil {
-			fmt.Println(err)
-			w.WriteHeader(http.StatusInternalServerError)
-			return
+		if pendingValue == "" {
+			_, err = updRequest.Exec(id, rName)
+			if err != nil {
+				fmt.Println("2", err)
+				w.WriteHeader(http.StatusInternalServerError)
+				return
+			}
+		} else {
+			_, err = updRequest.Exec(pendingValue + ", " + strconv.Itoa(int(id)), rName)
+			if err != nil {
+				fmt.Println("3", err)
+				w.WriteHeader(http.StatusInternalServerError)
+				return
+			}
 		}
 	}
 	db.Close()
