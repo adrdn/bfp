@@ -75,14 +75,54 @@ func Insert(w http.ResponseWriter, r *http.Request) {
 		selectedFlow := r.FormValue("flow")
 		description := r.FormValue("description")
 
-		newRequest, err :=db.Prepare(addNewRequest)
+		newRequest, err := db.Prepare(addNewRequest)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
+			return
 		}
 		// current_step is assinged to 2 because at this stage the request is already created
-		_, err = newRequest.Exec(selectedFlow, 2, "", "", "", description)
+		res, err := newRequest.Exec(selectedFlow, 2, "", "", "", description)
 		if err != nil {
+			fmt.Println(err)
 			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
+		// Fetch the role name upon the selected flow
+		roleName, err := db.Query("SELECT step2 FROM flow_" + strings.ToUpper(selectedFlow))
+		if err != nil {
+			fmt.Println(err)
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		var rName string
+		for roleName.Next() {
+			err = roleName.Scan(&rName)
+			if err != nil {
+				fmt.Println(err)
+				w.WriteHeader(http.StatusInternalServerError)
+				return
+			}
+		}
+
+		// Update the role table with the given request ID
+		id, err := res.LastInsertId()
+		if err != nil {
+			fmt.Println(err)
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		updRequest, err := db.Prepare("UPDATE role SET Pending = ? WHERE NAME = ?")
+		if err != nil {
+			fmt.Println(err)
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		_, err = updRequest.Exec(id, rName)
+		if err != nil {
+			fmt.Println(err)
+			w.WriteHeader(http.StatusInternalServerError)
+			return
 		}
 	}
 	db.Close()
