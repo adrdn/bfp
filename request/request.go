@@ -17,6 +17,7 @@ const echoALLRequest = "SELECT * FROM request"
 const echoOneRequest = "SELECT ID, type, current_step, termination, completion, description FROM request WHERE ID = ?"
 const addNewRequest = "INSERT INTO request(type, current_step, termination, completion, deletion, description) VALUES(?, ?, ?, ?, ?, ?)"
 const updateRequest = "UPDATE request SET current_step = ?, description = ? WHERE ID = ?"
+const addNewPending = "INSERT INTO pending(request_ID, role) VALUES (?, ?)"
 const terminateRequest = "UPDATE request SET current_step = 0, termination = ?, description = ? WHERE ID = ?"
 const finishRequest = "UPDATE request SET current_step = 0, completion = ?, description = ? WHERE ID = ?"
 const fetchTotalSteps = "SELECT total_steps from flow_"
@@ -80,10 +81,19 @@ func Insert(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusInternalServerError)
 		}
 		// current_step is assinged to 2 because at this stage the request is already created
-		_, err = newRequest.Exec(selectedFlow, 2, "", "", "", description)
+		res, err := newRequest.Exec(selectedFlow, 2, "", "", "", description)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
+			return
 		}
+		stepValue := getStepValue("2", selectedFlow)
+		ID, err := res.LastInsertId()
+		if err != nil {
+			fmt.Println(err)
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		addPending(int(ID), stepValue)
 	}
 	db.Close()
 	http.Redirect(w, r, "/request/view", 301)
