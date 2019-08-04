@@ -17,6 +17,10 @@ const echoALLRequest = "SELECT * FROM request"
 const echoOneRequest = "SELECT ID, type, current_step, termination, completion, description FROM request WHERE ID = ?"
 const addNewRequest = "INSERT INTO request(type, current_step, termination, completion, deletion, description) VALUES(?, ?, ?, ?, ?, ?)"
 const updateRequest = "UPDATE request SET current_step = ?, description = ? WHERE ID = ?"
+const updateRolePending = "UPDATE role SET Pending = ? WHERE NAME = ?"
+const fetchPendingValue = "SELECT Pending FROM role WHERE NAME = ?"
+const fetchSecondStep = "SELECT step2 FROM flow_"
+const fetchType = "SELECT type FROM request WHERE ID = ?"
 const terminateRequest = "UPDATE request SET current_step = 0, termination = ?, description = ? WHERE ID = ?"
 const finishRequest = "UPDATE request SET current_step = 0, completion = ?, description = ? WHERE ID = ?"
 const fetchTotalSteps = "SELECT total_steps from flow_"
@@ -89,7 +93,7 @@ func Insert(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// Fetch the role name upon the selected flow
-		roleName, err := db.Query("SELECT step2 FROM flow_" + strings.ToUpper(selectedFlow))
+		roleName, err := db.Query(fetchSecondStep + strings.ToUpper(selectedFlow))
 		if err != nil {
 			fmt.Println(err)
 			w.WriteHeader(http.StatusInternalServerError)
@@ -106,7 +110,7 @@ func Insert(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// Fetch the Pending value from the role table
-		pending, err := db.Query("SELECT Pending FROM role WHERE NAME = ?", rName)
+		pending, err := db.Query(fetchPendingValue, rName)
 		if err != nil {
 			fmt.Println("-1", err)
 			w.WriteHeader(http.StatusInternalServerError)
@@ -129,7 +133,7 @@ func Insert(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
-		updRequest, err := db.Prepare("UPDATE role SET Pending = ? WHERE NAME = ?")
+		updRequest, err := db.Prepare(updateRolePending)
 		if err != nil {
 			fmt.Println("1", err)
 			w.WriteHeader(http.StatusInternalServerError)
@@ -302,18 +306,26 @@ func Update(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method == "POST" {
 		ID := r.URL.Query().Get("id")
+		intID, _ := strconv.Atoi(ID)
 		currentStep := r.URL.Query().Get("cs")
 		intCurrentStep, _ := strconv.Atoi(currentStep)
+		typeValue := getType(intID)
 		description := r.FormValue("description")
 		decision := r.FormValue("decision")
 		if decision == "approve" || decision == "reject" {
 			if decision == "approve" {
 				intCurrentStep++
 				currentStep = strconv.Itoa(intCurrentStep)
+				roleName := getStep(currentStep, typeValue)
+				pending := getPending(roleName)
+				updatePending(pending, ID, roleName)
 			} else if decision == "reject" {
-			intCurrentStep--
-			currentStep = strconv.Itoa(intCurrentStep)
+				intCurrentStep--
+				currentStep = strconv.Itoa(intCurrentStep)
+				//roleName := getStep(currentStep, typeValue)
+				//pending := getPending(roleName)
 			}
+			// Update the request
 			request, err := db.Prepare(updateRequest)
 			if err != nil {
 				fmt.Println(err)
