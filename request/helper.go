@@ -21,6 +21,7 @@ func getStepValue(stepNumber, flowName string) string {
 			fmt.Println(err)
 		}
 	}
+	defer db.Close()
 	return step
 }
 
@@ -35,5 +36,16 @@ func addPending(requestID int, roleName string) {
 	if err != nil {
 		fmt.Println(err)
 	}
+	defer db.Close()
+}
+
+func updatePendingTable(role string, requestID int) {
+	db := config.DbConn()
+
+	res, err := db.Prepare(updatePending)
+	if err != nil {
+		fmt.Println(err)
+	}
+	res.Exec(role, requestID)
 	defer db.Close()
 }

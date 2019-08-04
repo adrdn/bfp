@@ -18,6 +18,7 @@ const echoOneRequest = "SELECT ID, type, current_step, termination, completion, 
 const addNewRequest = "INSERT INTO request(type, current_step, termination, completion, deletion, description) VALUES(?, ?, ?, ?, ?, ?)"
 const updateRequest = "UPDATE request SET current_step = ?, description = ? WHERE ID = ?"
 const addNewPending = "INSERT INTO pending(request_ID, role) VALUES (?, ?)"
+const updatePending = "UPDATE pending SET role = ? WHERE request_ID = ?"
 const terminateRequest = "UPDATE request SET current_step = 0, termination = ?, description = ? WHERE ID = ?"
 const finishRequest = "UPDATE request SET current_step = 0, completion = ?, description = ? WHERE ID = ?"
 const fetchTotalSteps = "SELECT total_steps from flow_"
@@ -86,6 +87,7 @@ func Insert(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
+		// insert the ID and current step's role into the pending table
 		stepValue := getStepValue("2", selectedFlow)
 		ID, err := res.LastInsertId()
 		if err != nil {
@@ -243,10 +245,13 @@ func ShowDetails(w http.ResponseWriter, r *http.Request) {
 // Update changes the request based on user decision
 func Update(w http.ResponseWriter, r *http.Request) {
 	db := config.DbConn()
+	var stepValue string
 
 	if r.Method == "POST" {
 		ID := r.URL.Query().Get("id")
+		intID, _ := strconv.Atoi(ID)
 		currentStep := r.URL.Query().Get("cs")
+		flowName := r.URL.Query().Get("type")
 		intCurrentStep, _ := strconv.Atoi(currentStep)
 		description := r.FormValue("description")
 		decision := r.FormValue("decision")
@@ -255,9 +260,13 @@ func Update(w http.ResponseWriter, r *http.Request) {
 				intCurrentStep++
 				currentStep = strconv.Itoa(intCurrentStep)
 			} else if decision == "reject" {
-			intCurrentStep--
-			currentStep = strconv.Itoa(intCurrentStep)
+				intCurrentStep--
+				currentStep = strconv.Itoa(intCurrentStep)
 			}
+			// update pending table
+			stepValue = getStepValue(currentStep, flowName)
+			updatePendingTable(stepValue, intID)
+			// update request table
 			request, err := db.Prepare(updateRequest)
 			if err != nil {
 				fmt.Println(err)
