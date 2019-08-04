@@ -290,6 +290,8 @@ func Update(w http.ResponseWriter, r *http.Request) {
 				fmt.Println(err)
 				w.WriteHeader(http.StatusInternalServerError)
 			}
+			// update pending table
+			updatePendingTable("", intID)
 		} else {
 			request, err := db.Prepare(finishRequest)
 			if err != nil {
@@ -303,6 +305,8 @@ func Update(w http.ResponseWriter, r *http.Request) {
 				fmt.Println(err)
 				w.WriteHeader(http.StatusInternalServerError)
 			}
+			// update pending table
+			updatePendingTable("", intID)
 		}
 	}
 	defer db.Close()
