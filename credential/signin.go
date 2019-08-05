@@ -5,11 +5,12 @@ import (
 
 	"adrdn/dit/config"
 	"adrdn/dit/user"
+	"adrdn/dit/role"
 
 	"golang.org/x/crypto/bcrypt"
 )
 
-const listOneUser = "SELECT password FROM user where username = ?"
+const listOneUser = "SELECT name, password, role FROM user where username = ?"
 const listAllRoles = "SELECT Name FROM role"
 const addNewUser = "INSERT INTO user(name, username, password, role) VALUES (?, ?, ?, ?)"
 
@@ -27,7 +28,11 @@ func Login(w http.ResponseWriter, r *http.Request) {
 // Authentication decides if the user can login or not
 func Authentication(w http.ResponseWriter, r *http.Request) {
 	db := config.DbConn()
-	var hashedPassword string
+
+	var name 			string
+	var hashedPassword 	string
+	var roleName		string
+
 	session, err := Store.Get(r, "dit")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -44,7 +49,7 @@ func Authentication(w http.ResponseWriter, r *http.Request) {
 		}
 
 		for checkData.Next() {
-			err = checkData.Scan(&hashedPassword)
+			err = checkData.Scan(&name, &hashedPassword, &roleName)
 			if err != nil {
 				http.Error(w, err.Error(), 500)
 			}
@@ -65,7 +70,11 @@ func Authentication(w http.ResponseWriter, r *http.Request) {
 		
 		defer db.Close()
 		u := user.User{
+			Name:			name,
 			Username:		username,
+			Role: role.Role{
+							Name:	roleName,
+				},
 			Authenticated:	true,
 		}
 		session.Values["user"] = u

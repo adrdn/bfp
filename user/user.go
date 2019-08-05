@@ -5,9 +5,10 @@ import (
 	"text/template"
 
 	"adrdn/dit/config"
+	"adrdn/dit/role"
 )
 
-const echoAllUsers = "SELECT  ID, name, username FROM user"
+const echoAllUsers = "SELECT  ID, name, username, role FROM user"
 const deleteUser = "DELETE FROM user WHERE id = ?"
 
 // User represents the user structure
@@ -16,6 +17,7 @@ type User struct {
 	Name     		string
 	Username 		string
 	Password 		string
+	role.Role			
 	Authenticated 	bool
 }
 
@@ -33,7 +35,7 @@ func DisplayAllUsers(w http.ResponseWriter, r *http.Request) {
 	uList := []User{}
 
 	for allUsers.Next() {
-		err = allUsers.Scan(&u.ID, &u.Name, &u.Username)
+		err = allUsers.Scan(&u.ID, &u.Name, &u.Username, &u.Role)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 		}

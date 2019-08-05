@@ -16,8 +16,10 @@ const deleteUser 	= "DELETE FROM role WHERE id = ?"
 
 // Role represents the role structure
 type Role struct {
-	ID int
-	Name string
+	ID 				int
+	Name 			string
+	Pending 		[]string
+	PendingCount	int
 }
 
 var tmpl = template.Must(template.ParseGlob("forms/admin/role/*"))

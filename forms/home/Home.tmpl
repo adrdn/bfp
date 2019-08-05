@@ -1,5 +1,11 @@
 {{ define "Home" }}
-<p>Successful Login</p><br>
-<h3>Welcome {{.}}</h3>
+<p>Successful Login</p>
+<p>Welcome <b>{{.Name}}</b></p>
+<p>You username is <b>{{.Username}}</b></p>
+<p>Your role is <b>{{.Role.Name}}</b></p>
+<p>Inbox(<b>{{.Role.PendingCount}})</b></p>
+{{range .Role.Pending}}
+    {{.}}<br>
+{{end}}
 <p><a href="/logout">Logout</a></p>
 {{ end }}

@@ -15,5 +15,7 @@ func Home(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		return
 	}
-	tmpl.ExecuteTemplate(w, "Home", user.Username)
+	user.Role.PendingCount = countPending(user.Role.Name)
+	user.Role.Pending = showPendingID(user.Role.Name)
+	tmpl.ExecuteTemplate(w, "Home", user)
 }

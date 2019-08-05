@@ -12,6 +12,7 @@
                 <tr>
                     <td><b>Name</b></td>
                     <td><b>Username</b></td>
+                    <td><b>Role</b></td>
                     <td><b>Delete</b></td>
                 </tr>
             </thead>
@@ -20,6 +21,7 @@
                     <tr>
                         <td>{{ .Name }}</td>
                         <td>{{ .Username }}</td>
+                        <td>{{ .Role }}</td>
                         <td><a href="/admin/users/delete?id={{ .ID }}" onclick="return confirm('Are you sure?')">Delete</a></td>
                     </tr>
                 {{ end }}
