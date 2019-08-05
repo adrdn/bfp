@@ -14,11 +14,29 @@ const addNewUser = "INSERT INTO user(name, username, password) VALUES (?, ?, ?)"
 
 // SignUp represent the sign up page
 func SignUp(w http.ResponseWriter, r *http.Request) {
-	ok, user := CheckAuthentication(w, r)
-	if !ok {
+	db := config.DbConn()
+	var role string
+	var roleList []string
+
+	res, err := db.Query(listAllRoles)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	tmpl.ExecuteTemplate(w, "SignUp", user)
+	for res.Next() {
+		err = res.Scan(&role)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		roleList = append(roleList, role)
+	}
+	
+	// ok, user := CheckAuthentication(w, r)
+	// if !ok {
+	// 	return
+	// }
+	tmpl.ExecuteTemplate(w, "SignUp", roleList)
 }
 
 // RegisterNewUser registers the user

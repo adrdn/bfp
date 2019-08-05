@@ -10,6 +10,7 @@ import (
 )
 
 const listOneUser = "SELECT password FROM user where username = ?"
+const listAllRoles = "SELECT Name FROM role"
 
 // Login revokes the login page
 func Login(w http.ResponseWriter, r *http.Request) {
@@ -75,16 +76,6 @@ func Authentication(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/home", http.StatusFound)
 	}
 }
-
-// Home revokes the home page
-func Home(w http.ResponseWriter, r *http.Request) {
-	ok, user := CheckAuthentication(w, r)
-	if !ok {
-		return
-	}
-	tmpl.ExecuteTemplate(w, "Home", user.Username)
-}
-
 
 // Logout signs the user out
 func Logout(w http.ResponseWriter, r *http.Request) {
