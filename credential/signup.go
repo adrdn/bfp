@@ -10,8 +10,6 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 )
 
-const addNewUser = "INSERT INTO user(name, username, password) VALUES (?, ?, ?)"
-
 // SignUp represent the sign up page
 func SignUp(w http.ResponseWriter, r *http.Request) {
 	db := config.DbConn()
@@ -46,6 +44,7 @@ func RegisterNewUser(w http.ResponseWriter, r *http.Request) {
 		name := r.FormValue("name")
 		username := r.FormValue("username")
 		password := r.FormValue("password")
+		role := r.FormValue("role")
 		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 		if err != nil {
 			//http.Error(w, "Server error, unable to create your account.", 500)
@@ -56,7 +55,7 @@ func RegisterNewUser(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			panic(err)
 		}
-		_, err = newUserData.Exec(name, username, password)
+		_, err = newUserData.Exec(name, username, password, role)
 		if err != nil {
 			panic(err)
 		}
