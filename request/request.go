@@ -10,23 +10,8 @@ import (
 
 	"adrdn/dit/flow"
 	"adrdn/dit/config"
+	"adrdn/dit/credential"
 )
-
-const echoAllFlow = "SELECT * FROM flow"
-const echoALLRequest = "SELECT * FROM request"
-const echoOneRequest = "SELECT ID, type, current_step, termination, completion, description FROM request WHERE ID = ?"
-const addNewRequest = "INSERT INTO request(type, current_step, termination, completion, deletion, description) VALUES(?, ?, ?, ?, ?, ?)"
-const updateRequest = "UPDATE request SET current_step = ?, description = ? WHERE ID = ?"
-const addNewPending = "INSERT INTO pending(request_ID, role) VALUES (?, ?)"
-const updatePending = "UPDATE pending SET role = ? WHERE request_ID = ?"
-const terminateRequest = "UPDATE request SET current_step = 0, termination = ?, description = ? WHERE ID = ?"
-const finishRequest = "UPDATE request SET current_step = 0, completion = ?, description = ? WHERE ID = ?"
-const fetchTotalSteps = "SELECT total_steps from flow_"
-const deleteRequest = "UPDATE request SET deletion = ? WHERE ID = ?"
-
-const terminatedStatus 	=	"Terminated"
-const completedStatus 	=	"Completed"
-const runningStatus		=	"In Process"
 
 var tmpl = template.Must(template.ParseGlob("forms/request/*"))
 
@@ -41,6 +26,10 @@ type Request struct {
 	Termination 	string
 	Completion		string
 	Deletion		string
+	CreatedAt		string
+	CreatedBy		string
+	UpdatedAt		string
+	UpdatedBy		string
 	Status			string
 	Description		string
 	IsFirstStep		bool
@@ -72,23 +61,31 @@ func New(w http.ResponseWriter, r *http.Request) {
 
 // Insert adds the new entity
 func Insert(w http.ResponseWriter, r *http.Request) {
+	request := Request{}
+	ok, user := credential.CheckAuthentication(w, r)
+	if !ok {
+		return
+	}
 	db := config.DbConn()
 	if r.Method == "POST" {
-		selectedFlow := r.FormValue("flow")
-		description := r.FormValue("description")
+		request.Type = r.FormValue("flow")
+		request.Description = r.FormValue("description")
+		request.CreatedBy = user.Username
+		t := time.Now()
+		request.CreatedAt = t.Format("2006-01-02 15:04:05")
 
-		newRequest, err :=db.Prepare(addNewRequest)
+		newRequest, err := db.Prepare(addNewRequest)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 		}
 		// current_step is assinged to 2 because at this stage the request is already created
-		res, err := newRequest.Exec(selectedFlow, 2, "", "", "", description)
+		res, err := newRequest.Exec(request.Type, 2, "", "", "", request.Description, request.CreatedAt, request.CreatedBy, "", "")
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
 		// insert the ID and current step's role into the pending table
-		stepValue := getStepValue("2", selectedFlow)
+		stepValue := getStepValue("2", request.Type)
 		ID, err := res.LastInsertId()
 		if err != nil {
 			fmt.Println(err)
@@ -113,7 +110,7 @@ func Echo(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	}
 	for requests.Next() {
-		err = requests.Scan(&req.ID, &req.Type, &req.CurrentStep, &req.Termination, &req.Completion, &req.Deletion, &req.Description)
+		err = requests.Scan(&req.ID, &req.Type, &req.CurrentStep, &req.Termination, &req.Completion, &req.Deletion, &req.Description, &req.CreatedAt, &req.CreatedBy, &req.UpdatedAt, &req.UpdatedBy)
 		if err != nil {
 			fmt.Println(err)
 			w.WriteHeader(http.StatusInternalServerError)

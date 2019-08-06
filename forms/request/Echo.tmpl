@@ -16,6 +16,8 @@
                     <td><b>Status</b></td>
                     <td><b>View</b></td>
                     <td><b>Delete</b></td>
+                    <td><b>Created At</b></td>
+                    <td><b>Created By</b></td>
                 </tr>
             </thead>
             <tbody>
@@ -28,6 +30,8 @@
                             <td>{{ .Status }}</td>
                             <td><a href="/request/detail?id={{ .ID }}">View</a></td>
                             <td><a href="/request/delete?id={{ .ID }}" onclick="return confirm('Are you sure?')">Delete</a></td>
+                            <td>{{ .CreatedAt }}</td>
+                            <td>{{ .CreatedBy }}</td>
                         </tr>
                     {{end}}
                 {{ end }}

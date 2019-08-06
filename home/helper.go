@@ -25,6 +25,7 @@ func showPendingID(role string)[]string {
 		}
 		IDList = append(IDList, ID)
 	}
+	defer db.Close()
 	return IDList
 }
 
@@ -42,5 +43,6 @@ func countPending(role string) int {
 			fmt.Println(err)
 		}
 	}
+	defer db.Close()
 	return count
 }
