@@ -2,40 +2,40 @@ package request
 
 import (
 	"fmt"
-	"time"
-	"strings"
-	"strconv"
 	"net/http"
+	"strconv"
+	"strings"
 	"text/template"
+	"time"
 
-	"adrdn/dit/flow"
 	"adrdn/dit/config"
 	"adrdn/dit/credential"
+	"adrdn/dit/flow"
 )
 
 var tmpl = template.Must(template.ParseGlob("forms/request/*"))
 
 // Request represents the request structure
 type Request struct {
-	ID	 			int
-	Type 			string
-	PriorStep		string
-	CurrentStep 	int
-	StrCurrentStep	string
-	NextStep		string
-	Termination 	string
-	Completion		string
-	Deletion		string
-	CreatedAt		string
-	CreatedBy		string
-	UpdatedAt		string
-	UpdatedBy		string
-	Status			string
-	Description		string
-	IsFirstStep		bool
-	IsLastStep		bool
-	TotalSteps		int
-	IsDeleted		bool
+	ID             int
+	Type           string
+	PriorStep      string
+	CurrentStep    int
+	StrCurrentStep string
+	NextStep       string
+	Termination    string
+	Completion     string
+	Deletion       string
+	CreatedAt      string
+	CreatedBy      string
+	UpdatedAt      string
+	UpdatedBy      string
+	Status         string
+	Description    string
+	IsFirstStep    bool
+	IsLastStep     bool
+	TotalSteps     int
+	IsDeleted      bool
 }
 
 // New starts a new request of the select flow
@@ -43,7 +43,7 @@ func New(w http.ResponseWriter, r *http.Request) {
 	db := config.DbConn()
 	flowEntity := flow.Flow{}
 	flowList := []flow.Flow{}
-	
+
 	flows, err := db.Query(echoAllFlow)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -125,7 +125,7 @@ func Echo(w http.ResponseWriter, r *http.Request) {
 		if req.Termination == "" && req.Completion == "" {
 			req.Status = runningStatus
 		} else if req.Termination != "" {
-			req.Status = terminatedStatus	
+			req.Status = terminatedStatus
 		} else {
 			req.Status = completedStatus
 		}
@@ -199,7 +199,7 @@ func ShowDetails(w http.ResponseWriter, r *http.Request) {
 		} else {
 			// Fetch string value of the previous Step
 			intPreStep := req.CurrentStep - 1
-			stringPreStep := strconv.Itoa(intPreStep)	
+			stringPreStep := strconv.Itoa(intPreStep)
 			preStep, err := db.Query("SELECT step" + stringPreStep + " FROM flow_" + strings.ToUpper(req.Type))
 			if err != nil {
 				fmt.Println(err)
@@ -243,6 +243,13 @@ func ShowDetails(w http.ResponseWriter, r *http.Request) {
 func Update(w http.ResponseWriter, r *http.Request) {
 	db := config.DbConn()
 	var stepValue string
+	ok, user := credential.CheckAuthentication(w, r)
+	if !ok {
+		return
+	}
+
+	t := time.Now()
+	dateTimeLayout := t.Format("2006-01-02 15:04:05")
 
 	if r.Method == "POST" {
 		ID := r.URL.Query().Get("id")
@@ -269,7 +276,7 @@ func Update(w http.ResponseWriter, r *http.Request) {
 				fmt.Println(err)
 				w.WriteHeader(http.StatusInternalServerError)
 			}
-			_, err = request.Exec(currentStep, description, ID)
+			_, err = request.Exec(currentStep, description, dateTimeLayout, user.Name, ID)
 			if err != nil {
 				fmt.Println(err)
 				w.WriteHeader(http.StatusInternalServerError)
@@ -280,9 +287,7 @@ func Update(w http.ResponseWriter, r *http.Request) {
 				fmt.Println(err)
 				w.WriteHeader(http.StatusInternalServerError)
 			}
-			t := time.Now()
-			dateTimeLayout := t.Format("2006-01-02 15:04:05")
-			_, err = request.Exec(dateTimeLayout, description, ID)
+			_, err = request.Exec(dateTimeLayout, description, dateTimeLayout, user.Name, ID)
 			if err != nil {
 				fmt.Println(err)
 				w.WriteHeader(http.StatusInternalServerError)
@@ -295,9 +300,7 @@ func Update(w http.ResponseWriter, r *http.Request) {
 				fmt.Println(err)
 				w.WriteHeader(http.StatusInternalServerError)
 			}
-			t := time.Now()
-			dateTimeLatout := t.Format("2006-01-02 15:04:05")
-			_, err = request.Exec(dateTimeLatout, description, ID)
+			_, err = request.Exec(dateTimeLayout, description, dateTimeLayout, user.Name, ID)
 			if err != nil {
 				fmt.Println(err)
 				w.WriteHeader(http.StatusInternalServerError)
