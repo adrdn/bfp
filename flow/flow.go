@@ -1,6 +1,7 @@
 package flow
 
 import (
+	"fmt"
 	"strconv"
 	"strings"
 	"net/http"
@@ -100,6 +101,7 @@ func Insert (w http.ResponseWriter, r *http.Request) {
 		// add a new entity to the 'flow' table
 		insForm, err := db.Prepare(newFlow)
 		if err != nil {
+			fmt.Println(err)
 			w.WriteHeader(http.StatusInternalServerError)
 		}
 		insForm.Exec(name)
@@ -115,6 +117,7 @@ func Insert (w http.ResponseWriter, r *http.Request) {
 		query := generatePopulateTableQuery(values, nameUpper)
 		_, err = db.Query(query)
 		if err != nil {
+			fmt.Println(err)
 			w.WriteHeader(http.StatusInternalServerError)
 		}
 

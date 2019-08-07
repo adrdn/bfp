@@ -63,3 +63,29 @@ func RegisterNewUser(w http.ResponseWriter, r *http.Request) {
 	defer db.Close()
 	http.Redirect(w, r, "/login", 301)
 }
+
+// ChangePassword revokes the change password page
+func ChangePassword(w http.ResponseWriter, r *http.Request) {
+	tmpl.ExecuteTemplate(w, "Password", nil)
+}
+
+// UpdatePassword changes the password
+func UpdatePassword(w http.ResponseWriter, r *http.Request) {
+	db := config.DbConn()
+
+	if r.Method == "POST" {
+		pass := r.FormValue("password")
+		res, err := db.Prepare(chanPassword)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		_, err = res.Exec(pass)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+	}
+	defer db.Close()
+	http.Redirect(w, r, "/home", http.StatusAccepted)
+}

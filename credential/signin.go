@@ -13,6 +13,7 @@ import (
 const listOneUser = "SELECT name, password, role FROM user where username = ?"
 const listAllRoles = "SELECT Name FROM role"
 const addNewUser = "INSERT INTO user(name, username, password, role) VALUES (?, ?, ?, ?)"
+const chanPassword = "UPDATE user SET password = ? WHERE username = ?"
 
 // Login revokes the login page
 func Login(w http.ResponseWriter, r *http.Request) {

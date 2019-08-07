@@ -21,7 +21,7 @@
                     <tr>
                         <td>{{ .Name }}</td>
                         <td>{{ .Username }}</td>
-                        <td>{{ .Role }}</td>
+                        <td>{{ .Role.Name }}</td>
                         <td><a href="/admin/users/delete?id={{ .ID }}" onclick="return confirm('Are you sure?')">Delete</a></td>
                     </tr>
                 {{ end }}

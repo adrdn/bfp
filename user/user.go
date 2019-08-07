@@ -35,7 +35,7 @@ func DisplayAllUsers(w http.ResponseWriter, r *http.Request) {
 	uList := []User{}
 
 	for allUsers.Next() {
-		err = allUsers.Scan(&u.ID, &u.Name, &u.Username, &u.Role)
+		err = allUsers.Scan(&u.ID, &u.Name, &u.Username, &u.Role.Name)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 		}

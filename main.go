@@ -44,6 +44,8 @@ func main() {
 	http.HandleFunc("/request/delete", request.Delete)
 
 	http.HandleFunc("/home", home.Home)
+	http.HandleFunc("/home/password", credential.ChangePassword)
+	http.HandleFunc("home/password/update", credential.UpdatePassword)
 
 	http.ListenAndServe(":8000", nil)
 }

@@ -22,8 +22,8 @@ func init() {
 	Store = sessions.NewCookieStore(authenticationKey, encryptionKey)
 	Store.Options = &sessions.Options {
 		Path: 		"/",
-		MaxAge:		86400 * 7,
-		//MaxAge:		60 * 1,
+		//MaxAge:		86400 * 7,
+		MaxAge:		60 * 1,
 		HttpOnly:	true,	 
 	}
 	gob.Register(user.User{})
